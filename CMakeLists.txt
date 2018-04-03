@@ -1,18 +1,20 @@
 cmake_minimum_required(VERSION 3.5.1)
 project( testing )
 find_package( Boost )
+find_package( GSL )
 
 # since 3.1
 set (CMAKE_CXX_STANDARD 11)
 
 include_directories( ${Boost_INCLUDE_DIRS})
 include_directories( ${CMAKE_SOURCE_DIR}/include )
+include_directories( ${GSL_INCLUDE_DIRS} )
 LIST(APPEND SOURCES
   src/operator_overloading.cpp
   src/main.cpp)
 
 add_executable( testing.out ${SOURCES} )
-target_link_libraries( testing.out ${Boost_LIBRARIES} )
+target_link_libraries( testing.out ${Boost_LIBRARIES} ${GSL_LIBRARIES} GSL::gsl GSL::gslcblas )
 
 
 # # sets RPATH for *install*ed files
