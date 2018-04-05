@@ -49,22 +49,29 @@
 //   return 0;
 // }
 
-#include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/io.hpp>
+//#include <boost/numeric/ublas/triangular.hpp>
+//#include <boost/numeric/ublas/io.hpp>
+#include <vector>
 
 int main () {
-  using namespace boost::numeric::ublas;
-  matrix<double> m (3, 3);
-  vector<double> v (3);
-  for (unsigned i = 0; i < std::min (m.size1 (), v.size ()); ++ i) {
-    for (unsigned j = 0; j <= i; ++ j)
-      m (i, j) = 3 * i + j + 1;
-    v (i) = i;
-  }
+  // using namespace boost::numeric::ublas;
+  // matrix<double> m (3, 3);
+  // vector<double> v (3);
+  // for (unsigned i = 0; i < std::min (m.size1 (), v.size ()); ++ i) {
+  //   for (unsigned j = 0; j <= i; ++ j)
+  //     m (i, j) = 3 * i + j + 1;
+  //   v (i) = i;
+  // }
 
-  std::cout << m << std::endl;
-  std::cout << v << std::endl;
+  // std::cout << m << std::endl;
+  // std::cout << v << std::endl;
 
-  std::cout << solve (m, v, lower_tag ()) << std::endl;
-  std::cout << solve (v, m, lower_tag ()) << std::endl;
+  // std::cout << solve (m, v, lower_tag ()) << std::endl;
+  // std::cout << solve (v, m, lower_tag ()) << std::endl;
+
+  //std::vector<int> i{1,2};
+  //auto j = &i[1];
+  //const int i = 0;
+  //&i = 1;
+  //&1;
 }
