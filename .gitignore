@@ -1,2 +1,10 @@
 
-a.out
+# every executable
+*.out
+
+.gitignore
+
+# allow .dir-locals.el for basic c++ project set up
+#.dir-locals.el
+
+build/
