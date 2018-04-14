@@ -33,13 +33,53 @@
 //   }
 // }
 
+// #include <iostream>
+
+// using std::cout;
+
+// int main(int argc, char** argv) {
+//   auto glambda = [](int a, double&& b) { return a < b; }; // type unknow
+//   cout << glambda(3, 3.14);
+
+//   return 0;
+// }
+// #include <boost/numeric/ublas/matrix.hpp>
+// #include <boost/numeric/ublas/io.hpp>
+
+// int main () {
+//   using namespace boost::numeric::ublas;
+//   matrix<double> m (3, 3);
+//   for (unsigned i = 0; i < m.size1 (); ++ i)
+//     for (unsigned j = 0; j < m.size2 (); ++ j)
+//       m (i, j) = 3 * i + j;
+//   std::cout << m << std::endl;
+// }
+// #include <boost/numeric/ublas/vector.hpp>
+// #include <boost/numeric/ublas/io.hpp>
+
+// int main () {
+//   using namespace boost::numeric::ublas;
+//   vector<double> v (3);
+//   for (unsigned i = 0; i < v.size (); ++ i)
+//     v (i) = i;
+//   std::cout << v << std::endl;
+// }
+
+#include <gsl/gsl_integration.h>
 #include <iostream>
+#include <cmath>
 
-using std::cout;
+double f(double x, void * params) {
+  return std::sin(x);
+}
 
-int main(int argc, char** argv) {
-  auto glambda = [](int a, double&& b) { return a < b; }; // type unknow
-  cout << glambda(3, 3.14);
+int main() {
+  gsl_integration_glfixed_table * integral_table =
+    gsl_integration_glfixed_table_alloc(10);
 
-  return 0;
+  gsl_function F;
+  F.function = f;
+
+  std::cout
+    << gsl_integration_glfixed(&F, 0, 1, integral_table) << std::endl;
 }
