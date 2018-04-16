@@ -94,12 +94,24 @@
 //   //&i = 1;
 //   //&1;
 // }
-#include <cstdio>
+// #include <cstdio>
+
+// int main() {
+//   // int* p = operator new(1000));
+//   // void *p = operator new[](1000);
+//   // operator delete(p);
+
+//   // printf("%lu", sizeof(p));
+// }
+#include <omp.h>
+#include <stdio.h>
+
+#define NUM_ITERATIONS 10000000
 
 int main() {
-  // int* p = operator new(1000));
-  // void *p = operator new[](1000);
-  // operator delete(p);
+  #pragma omp parallel for
+  for ( int j = 0; j < NUM_ITERATIONS; ++ j ) {
+    printf( "%d\n", j );
+  }
 
-  // printf("%lu", sizeof(p));
 }
