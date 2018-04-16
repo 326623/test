@@ -51,25 +51,25 @@
 
 //#include <boost/numeric/ublas/triangular.hpp>
 //#include <boost/numeric/ublas/io.hpp>
-#include <vector>
-#include <gsl/gsl_integration.h>
-#include <iostream>
-#include <cmath>
+// #include <vector>
+// #include <gsl/gsl_integration.h>
+// #include <iostream>
+// #include <cmath>
 
-double f(double x, void * params) {
-  return std::sin(x);
-}
+// double f(double x, void * params) {
+//   return std::sin(x);
+// }
 
-int main() {
-  gsl_integration_glfixed_table * integral_table =
-    gsl_integration_glfixed_table_alloc(10);
+// int main() {
+//   gsl_integration_glfixed_table * integral_table =
+//     gsl_integration_glfixed_table_alloc(10);
 
-  gsl_function F;
-  F.function = f;
+//   gsl_function F;
+//   F.function = f;
 
-  std::cout
-    << gsl_integration_glfixed(&F, 0, M_PI, integral_table) << std::endl;
-}
+//   std::cout
+//     << gsl_integration_glfixed(&F, 0, M_PI, integral_table) << std::endl;
+// }
 
 
 // int main () {
@@ -94,3 +94,12 @@ int main() {
 //   //&i = 1;
 //   //&1;
 // }
+#include <cstdio>
+
+int main() {
+  // int* p = operator new(1000));
+  // void *p = operator new[](1000);
+  // operator delete(p);
+
+  // printf("%lu", sizeof(p));
+}
