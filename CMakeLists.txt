@@ -3,7 +3,7 @@ project( testing )
 find_package( Boost )
 find_package( GSL )
 find_package( OpenMP )
-find_package( OpenCV )
+#find_package( OpenCV )
 
 # since 3.1
 set (CMAKE_CXX_STANDARD 11)
@@ -25,8 +25,10 @@ LIST(APPEND SOURCES
 #add_executable( testing.out ${SOURCES} )
 #target_link_libraries( testing.out ${Boost_LIBRARIES} ${GSL_LIBRARIES} GSL::gsl GSL::gslcblas )
 
-add_executable( testing.out src/load_data.cpp )
-target_link_libraries( testing.out ${OpenCV_LIBS} )
+add_executable( testing.out src/main.cpp)
+
+#add_executable( testing.out src/load_data.cpp )
+#target_link_libraries( testing.out ${OpenCV_LIBS} )
 
 # # sets RPATH for *install*ed files
 # set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib") # Note CMake escaping aroung '$' sign.
