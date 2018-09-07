@@ -2,7 +2,8 @@
 # every executable
 *.out
 
-.gitignore
+!.gitignore
+.*
 
 # allow .dir-locals.el for basic c++ project set up
 #.dir-locals.el

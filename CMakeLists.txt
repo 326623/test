@@ -19,14 +19,15 @@ include_directories( ${Boost_INCLUDE_DIRS})
 include_directories( ${CMAKE_SOURCE_DIR}/include )
 include_directories( ${GSL_INCLUDE_DIRS} )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
-LIST(APPEND SOURCES
-  src/operator_overloading.cpp)
+add_executable( testing.out test.cpp )
+#LIST(APPEND SOURCES
+#  src/operator_overloading.cpp)
 
 #add_executable( testing.out ${SOURCES} )
 #target_link_libraries( testing.out ${Boost_LIBRARIES} ${GSL_LIBRARIES} GSL::gsl GSL::gslcblas )
 
-add_executable( testing.out src/load_data.cpp )
-target_link_libraries( testing.out ${OpenCV_LIBS} )
+#add_executable( testing.out src/load_data.cpp )
+#target_link_libraries( testing.out ${OpenCV_LIBS} )
 
 # # sets RPATH for *install*ed files
 # set(CMAKE_INSTALL_RPATH "\$ORIGIN/lib") # Note CMake escaping aroung '$' sign.

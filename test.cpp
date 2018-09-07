@@ -1,85 +1,52 @@
-
-// #include <opencv2/core.hpp>
-// #include <iostream>
-// #include <string>
-// #include <vector>
-// using std::vector;
-// using std::string;
-// using std::cout;
-// using std::endl;
-// using std::cerr;
-// using std::ostream;
-// using namespace cv;
-
-
-
-// // struct data {
-// //   float a,b,c;
-// // };
-
-// int main(int argc, char** argv)
-// {
-
-
-//   try {
-// //    FileStorage fs("svm_1_split_0.json", 0); // use postfix to know it's json, 0 for read
-//     FileStorage fs("svm_1.json", 0);
-//     FileNode root = fs[(string)"svm" + (string)"_1"];
-//     cout << root.size() << std::endl;
-//     cout << fs.getFormat() << std::endl;
-//   }
-//   catch(const Exception& e) {
-//     cout << "error: " << e.what() << std::endl;
-//   }
-// }
-
-// #include <iostream>
-
-// using std::cout;
-
-// int main(int argc, char** argv) {
-//   auto glambda = [](int a, double&& b) { return a < b; }; // type unknow
-//   cout << glambda(3, 3.14);
-
-//   return 0;
-// }
-// #include <boost/numeric/ublas/matrix.hpp>
-// #include <boost/numeric/ublas/io.hpp>
-
-// int main () {
-//   using namespace boost::numeric::ublas;
-//   matrix<double> m (3, 3);
-//   for (unsigned i = 0; i < m.size1 (); ++ i)
-//     for (unsigned j = 0; j < m.size2 (); ++ j)
-//       m (i, j) = 3 * i + j;
-//   std::cout << m << std::endl;
-// }
-// #include <boost/numeric/ublas/vector.hpp>
-// #include <boost/numeric/ublas/io.hpp>
-
-// int main () {
-//   using namespace boost::numeric::ublas;
-//   vector<double> v (3);
-//   for (unsigned i = 0; i < v.size (); ++ i)
-//     v (i) = i;
-//   std::cout << v << std::endl;
-// }
-
-#include <gsl/gsl_integration.h>
+#include <vector>
+#include <algorithm>
 #include <iostream>
-#include <cmath>
+#include <random>
+//#include <cstdlib>
+// insertion sort
+template <typename Iterator>
+void insertionSort(Iterator first, Iterator last) {
 
-double f(double x, void * params) {
-  return std::sin(x);
+  for (Iterator ith = first; ith != last; ++ ith) {
+
+    Iterator back = ith;
+    // pick the ith element and insert back
+    while (back != first && *(back) < *(back-1)) {
+      std::swap(*(back), *(back-1));
+      back--;
+    }
+  }
+}
+
+template <typename ForwardIterator>
+void display(ForwardIterator first, ForwardIterator last) {
+  for (; first != last; ++ first)
+    std::cout << *first << ' ';
+  std::cout << std::endl;
+}
+
+// check if is sorted
+template <typename ForwardIterator>
+bool check(ForwardIterator first, ForwardIterator last) {
+  // somewhat less efficient here
+  for (; first+1 != last; ++ first)
+    if (*first > *(first+1)) return false;
+  return true;
 }
 
 int main() {
-  gsl_integration_glfixed_table * integral_table =
-    gsl_integration_glfixed_table_alloc(10);
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(1, 10000);
+  std::vector<int> test_vec(1000);
+  for (auto & item : test_vec)
+    item = dis(gen);
 
-  gsl_function F;
-  F.function = f;
+  //  display(test_vec.begin(), test_vec.end());
+  std::cout << check(test_vec.begin(), test_vec.end()) << std::endl;
 
-  std::cout
-    << gsl_integration_glfixed(&F, 0, 1, integral_table) << std::endl;
+  insertionSort(test_vec.begin(), test_vec.end());
+
+  // display(test_vec.begin(), test_vec.end());
+  std::cout << check(test_vec.begin(), test_vec.end()) << std::endl;
 }

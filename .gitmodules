@@ -1,0 +1,4 @@
+[submodule "cmake_modules/tensorflow-cmake"]
+	path = cmake_modules/tensorflow-cmake
+	url = git@github.com:326623/tensorflow-cmake
+	branch = master
