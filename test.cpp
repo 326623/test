@@ -53,25 +53,75 @@
 
 // tensorflow/cc/example/example.cc
 
-#include "tensorflow/cc/client/client_session.h"
-#include "tensorflow/cc/ops/standard_ops.h"
-#include "tensorflow/core/framework/tensor.h"
+// #include "tensorflow/cc/client/client_session.h"
+// #include "tensorflow/cc/ops/standard_ops.h"
+// #include "tensorflow/core/framework/tensor.h"
 
-int main() {
-  using namespace tensorflow;
-  using namespace tensorflow::ops;
-  Scope root = Scope::NewRootScope();
-  // Matrix A = [3 2; -1 0]
-  auto A = Const(root, { {3.f, 2.f}, {-1.f, 0.f} });
-  // Vector b = [3 5]
-  auto b = Const(root, { {3.f, 5.f} });
-  // v = Ab^T
-  auto v = MatMul(root.WithOpName("v"), A, b, MatMul::TransposeB(true));
-  std::vector<Tensor> outputs;
-  ClientSession session(root);
-  // Run and fetch v
-  TF_CHECK_OK(session.Run({v}, &outputs));
-  // Expect outputs[0] == [19; -3]
-  LOG(INFO) << outputs[0].matrix<float>();
-  return 0;
-}
+// int main() {
+//   using namespace tensorflow;
+//   using namespace tensorflow::ops;
+//   Scope root = Scope::NewRootScope();
+//   // Matrix A = [3 2; -1 0]
+//   auto A = Const(root, { {3.f, 2.f}, {-1.f, 0.f} });
+//   // Vector b = [3 5]
+//   auto b = Const(root, { {3.f, 5.f} });
+//   // v = Ab^T
+//   auto v = MatMul(root.WithOpName("v"), A, b, MatMul::TransposeB(true));
+//   std::vector<Tensor> outputs;
+//   ClientSession session(root);
+//   // Run and fetch v
+//   TF_CHECK_OK(session.Run({v}, &outputs));
+//   // Expect outputs[0] == [19; -3]
+//   LOG(INFO) << outputs[0].matrix<float>();
+//   return 0;
+// }
+// #include <iostream>
+// #include <algorithm>
+
+// int n; // the function instantiated will have a pointer to it
+
+// template <typename Integral>
+// void perm(Integral a[], Integral k) {
+//   if (k == 0) {
+//     for(Integral i = 0; i < n; ++ i)
+//       std::cout << a[i];
+//     std::cout << '\n';
+//   }
+//   else {
+//     const Integral start = n - k;
+//     for (Integral i = start; i < n; ++ i) {
+//       std::swap(a[i], a[start]);
+//       perm(a, k-1);
+//       std::swap(a[i], a[start]);
+//     }
+//   }
+// }
+
+// int main() {
+//   std::cin >> n;
+//   int *a = new int[n];
+
+//   for (int i = 0; i < n; ++ i)
+//     std::cin >> a[i];
+
+//   perm(a, n);
+// }
+
+class Solution {
+public:
+  string getPermutation(int n, int k) {
+    std::vector<int> factorial_num(n-1, 1);
+    std::string res;
+    for (int i = 1; i < factorial_num.size(); ++ i)
+      factorial_num[i] = (i + 1) * factorial_num[i-1];
+
+    int index = k-1;
+    for (int i = factorial_num.size()-1; i >= 0; -- i) {
+      int num = index / factorial_num[i];
+      res += static_cast<char>(num + '0');
+      index = index % factorial_num[i];
+    }
+    res += static_cast<char>(index);
+    return res;
+  }
+};

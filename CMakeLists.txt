@@ -1,17 +1,26 @@
 cmake_minimum_required(VERSION 3.5.1)
+
+if(MSVC)
+  add_compile_options(/W3 /WX)
+else()
+  #add_compile_options(-W -Wall -Werror)
+  add_compile_options(-W -Wall)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules/tensorflow-cmake")
-message(${CMAKE_MODULE_PATH})
+
 find_package( TensorFlow REQUIRED )
 find_package( Eigen3 REQUIRED )
 find_package( Protobuf REQUIRED )
 
 set(CMAKE_CXX_STANDARD 11)
-message(${Protobuf_INCLUDE_DIR})
-include_directories(${Protobuf_INCLUDE_DIR})
-include_directories(${EIGEN3_INCLUDE_DIR})
-include_directories(${TensorFlow_INCLUDE_DIR})
+add_subdirectory(abseil-cpp)
+
 add_executable(testing.out test.cpp)
-target_link_libraries(testing.out ${TensorFlow_LIBRARAY})
+target_include_directories(testing.out PRIVATE
+  ${Protobuf_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${TensorFlow_INCLUDE_DIR})
+target_link_libraries(testing.out PRIVATE
+  ${TensorFlow_LIBRARY} absl::base)
 
 
 

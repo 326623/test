@@ -9,3 +9,5 @@
 #.dir-locals.el
 
 build/
+
+__pycache__
