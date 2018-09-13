@@ -107,21 +107,24 @@
 //   perm(a, n);
 // }
 
-class Solution {
-public:
-  string getPermutation(int n, int k) {
-    std::vector<int> factorial_num(n-1, 1);
-    std::string res;
-    for (int i = 1; i < factorial_num.size(); ++ i)
-      factorial_num[i] = (i + 1) * factorial_num[i-1];
+// class Solution {
+// public:
+//   string getPermutation(int n, int k) {
+//     std::vector<int> factorial_num(n-1, 1);
+//     std::string res;
+//     for (int i = 1; i < factorial_num.size(); ++ i)
+//       factorial_num[i] = (i + 1) * factorial_num[i-1];
 
-    int index = k-1;
-    for (int i = factorial_num.size()-1; i >= 0; -- i) {
-      int num = index / factorial_num[i];
-      res += static_cast<char>(num + '0');
-      index = index % factorial_num[i];
-    }
-    res += static_cast<char>(index);
-    return res;
-  }
-};
+//     int index = k-1;
+//     for (int i = factorial_num.size()-1; i >= 0; -- i) {
+//       int num = index / factorial_num[i];
+//       res += static_cast<char>(num + '0');
+//       index = index % factorial_num[i];
+//     }
+//     res += static_cast<char>(index);
+//     return res;
+//   }
+// };
+int main() {
+  return 1;
+}
