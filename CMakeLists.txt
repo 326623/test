@@ -25,9 +25,13 @@ target_include_directories(testing.out PRIVATE
 target_link_libraries(testing.out PRIVATE
   ${TensorFlow_LIBRARY} absl::base)
 
-add_executable(hw.out hw.cpp)
-target_include_directories(hw.out PRIVATE ${GTEST_INCLUDE_DIR})
-target_link_libraries(hw.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
+# add_executable(hw.out hw.cpp)
+# target_include_directories(hw.out PRIVATE ${GTEST_INCLUDE_DIR})
+# target_link_libraries(hw.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
+
+add_executable(hw2.out hw2.cpp)
+target_include_directories(hw2.out PRIVATE ${GTEST_INCLUDE_DIR})
+target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
 
 
 

@@ -125,6 +125,29 @@
 //     return res;
 //   }
 // };
+
+#include <stdio.h>
+#include <time.h>
+#define SIZE 25600
+int a[SIZE], b[SIZE], c[SIZE];
+void foo () {
+  int i,j;
+  for (j=0; j<SIZE; ++j) {
+    for (i=0; i<SIZE; i++){
+      a[i] = b[i] + c[i];
+    }
+  }
+
+}
+
 int main() {
-  return 1;
+  clock_t t;
+  t = clock();
+  foo();
+  t = clock() - t;
+  float usedTime = ((float)t)/CLOCKS_PER_SEC;
+  long long int numComp = SIZE * SIZE;
+  printf("%f FLOPS", numComp / usedTime / 1024 / 1024 / 1024);
+
+  return 0;
 }

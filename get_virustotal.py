@@ -4,6 +4,7 @@ import requests, json, \
 import os
 from multiprocessing.dummy import Pool as ThreadPool
 from multiprocessing import Lock
+import time
 
 globalLock = Lock()
 # api query
@@ -14,18 +15,28 @@ queryFormat = \
 def queryUrl(url, write_path):
     urlQuery = queryFormat.format(urllib.parse.quote(url, safe=''))
     print(urlQuery + ' querying')
-    req = requests.get(urlQuery)
+    content = (requests.get(urlQuery)).content
+    content = json.loads(content)
+    sleepTime = 30
+    # receive error
+    while content.get('error') == None:
+        print(urlQuery + 'try again in ', sleepTime)
+        time.sleep(sleepTime)
+        sleepTime += sleepTime
+        content = (requests.get(urlQuery)).content
+        content = json.loads(content)
 
     data = None
 
     globalLock.acquire()
     with open(write_path, 'r') as f:
         data = json.load(f)
-        data.append(json.loads(req.content))
+        data.append(json.loads(content))
 
     with open(write_path, 'w') as f:
         json.dump(data, f)
     globalLock.release()
+    time.sleep(5)
 
 def startQuery(url_list, write_path, num_threads):
     # if file is empty initialize it with a pair of []
@@ -42,7 +53,7 @@ def startQuery(url_list, write_path, num_threads):
     pool.join()
 
 if __name__ == '__main__':
-    numThreads = 4
+    numThreads = 1
     fileName = 't2.json'
 
     content = None
