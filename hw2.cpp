@@ -63,6 +63,7 @@ TEST(testPartition, testOnVector) {
   }
 
   EXPECT_TRUE(32 == *seperation);
+  ++iter;
 
   while(iter != testSubject.end()) {
     EXPECT_TRUE(*iter > *seperation);
