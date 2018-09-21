@@ -51,21 +51,6 @@ ForwardIt partition(ForwardIt a, ForwardIt end,
   return space;
 }
 
-// int partition(int *array, int n, int k) {
-//   const int pivot = array[k];
-//   std::iter_swap(array, array + k);
-//   int space = 1;
-
-//   for (int i = 1; i < n; ++ i) {
-//     if (array[i] < pivot) {
-//       std::swap(array[i], array[space]);
-//       ++space;
-//     }
-//   }
-//   std::iter_swap(array, array + space - 1);
-//   return space;
-// }
-
 int partition(int *array, int n, int pivot) {
   int space = 0;
   for (int i = 0; i < n; ++ i) {
@@ -200,7 +185,7 @@ TEST(SELECT, NTH_SAME_ELEMENT) {
 TEST(SELECT, RANDOM_NTH) {
   std::vector<int> testSubject1;
   std::vector<int> testSubject2;
-  const int sep = 5000;
+  const int sep = 5000000;
   std::random_device rd;
 
   for (int n = 0; n < sep; ++ n) {
@@ -282,7 +267,7 @@ TEST(NEW_SELECT, NTH) {
 TEST(NEW_SELECT, RANDOM_NTH) {
   std::vector<int> testSubject1;
   std::vector<int> testSubject2;
-  const int sep = 50000;
+  const int sep = 5000000;
   std::random_device rd;
 
   for (int n = 0; n < sep; ++ n) {
@@ -296,6 +281,56 @@ TEST(NEW_SELECT, RANDOM_NTH) {
 
   const int nth = 0;
   auto result = Select(testSubject1.data(), testSubject1.size(), nth);
+
+  std::sort(testSubject2.begin(), testSubject2.end());
+  EXPECT_EQ(result, testSubject2[nth]);
+}
+
+// assumes k < n
+template <typename Type, typename Size_t = std::size_t>
+Type __partition(Type *array, Size_t n, Size_t k) {
+  const Type pivot = array[k];
+  std::iter_swap(array, array + k);
+  Size_t space = 1;
+
+  for (Size_t i = 1; i < n; ++ i) {
+    if (array[i] < pivot) {
+      std::swap(array[i], array[space]);
+      ++space;
+    }
+  }
+  std::iter_swap(array, array + space - 1);
+  return space;
+}
+
+template <typename Type, typename Size_t = std::size_t>
+Type nth_element(Type a[], Size_t low, Size_t high, Size_t index) {
+  while(low < high) {
+    const Size_t pivotPos = 0;
+    Size_t pos = __partition(a + low, high - low, pivotPos);
+    if (index < pos) high = pos - 1;
+    else low = pos;
+  }
+  return a[low];
+}
+
+TEST(NTH_ELEMENT, RANDOM_NTH) {
+  std::vector<int> testSubject1;
+  std::vector<int> testSubject2;
+  const int sep = 5000000;
+  std::random_device rd;
+
+  for (int n = 0; n < sep; ++ n) {
+    std::uniform_int_distribution<int> distrib1(sep * n, sep * 2 * n);
+    std::uniform_int_distribution<int> distrib2(sep * n * 3, sep * n * 4);
+    testSubject1.emplace_back(distrib1(rd));
+    testSubject2.emplace_back(distrib2(rd));
+  }
+  testSubject1.insert(testSubject1.end(), testSubject2.begin(), testSubject2.end());
+  testSubject2 = testSubject1;
+
+  const std::size_t nth = 0;
+  auto result = nth_element(testSubject1.data(), 0ul, testSubject1.size(), nth);
 
   std::sort(testSubject2.begin(), testSubject2.end());
   EXPECT_EQ(result, testSubject2[nth]);
