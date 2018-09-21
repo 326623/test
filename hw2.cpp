@@ -197,10 +197,91 @@ TEST(SELECT, NTH_SAME_ELEMENT) {
 }
 
 
-TEST(SELECT, RANDOM_NTH) {
+// TEST(SELECT, RANDOM_NTH) {
+//   std::vector<int> testSubject1;
+//   std::vector<int> testSubject2;
+//   const int sep = 500;
+//   std::random_device rd;
+
+//   for (int n = 0; n < sep; ++ n) {
+//     std::uniform_int_distribution<int> distrib1(sep * n, sep * 2 * n);
+//     std::uniform_int_distribution<int> distrib2(sep * n * 3, sep * n * 4);
+//     testSubject1.emplace_back(distrib1(rd));
+//     testSubject2.emplace_back(distrib2(rd));
+//   }
+//   testSubject1.insert(testSubject1.end(), testSubject2.begin(), testSubject2.end());
+//   testSubject2 = testSubject1;
+
+//   const int nth = 0;
+//   auto result = select(testSubject1.data(), 0, testSubject1.size(), nth, 5);
+
+//   std::sort(testSubject2.begin(), testSubject2.end());
+//   EXPECT_EQ(result, testSubject2[nth]);
+// }
+
+template <typename Type>
+void mid(Type A[], int i, Type p[]) {
+  int j = i * 5;
+  std::sort(A + j, A + j + 5);
+  p[i] = A[j+2];
+}
+
+template <typename Type>
+Type Select(Type A[], int n, int k) {
+  int i, j, s, t;
+  Type m, *p, *q, *r;
+  if (n <= 38) {
+    std::sort(A, A + n);
+    return A[k];
+  }
+
+  p = new Type[3*n/4];
+  q = new Type[3*n/4];
+  r = new Type[3*n/4];
+  for (i=0;i<n/5;++i) {
+    mid(A, i, p);
+  }
+  // larger one
+  m = Select(p, i, i/2+i%2);
+  // partition
+  i = j = s = 0;
+  for (t=0;t<n;++t) {
+    if (A[t] < m)
+      p[i++] = A[t];
+    else if (A[t]==m)
+      q[j++] = A[t];
+    else
+      r[s++] = A[t];
+  }
+  if (i>k)
+    return Select(p,i,k);
+  else if (i+j>=k)
+    return m;
+  else
+    return Select(r,s,k-i-j);
+}
+
+TEST(NEW_SELECT, NTH) {
+  for (int i = 0; i < 20; ++ i) {
+    std::vector<int> testSubject1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+    std::vector<int> testSubject2 = {21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40};
+
+    testSubject1.insert(testSubject1.end(), testSubject2.begin(), testSubject2.end());
+    testSubject2 = testSubject1;
+    const int nth = i;
+    auto result = Select(testSubject1.data(), testSubject1.size(), nth);
+
+    std::sort(testSubject2.begin(), testSubject2.end());
+    EXPECT_EQ(result, testSubject2[nth]);
+    // std::cout << testSubject1 << '\n'
+    //           << testSubject2 << '\n';
+  }
+}
+
+TEST(NEW_SELECT, RANDOM_NTH) {
   std::vector<int> testSubject1;
   std::vector<int> testSubject2;
-  const int sep = 500;
+  const int sep = 500000;
   std::random_device rd;
 
   for (int n = 0; n < sep; ++ n) {
@@ -213,7 +294,7 @@ TEST(SELECT, RANDOM_NTH) {
   testSubject2 = testSubject1;
 
   const int nth = 0;
-  auto result = select(testSubject1.data(), 0, testSubject1.size(), nth, 5);
+  auto result = Select(testSubject1.data(), testSubject1.size(), nth);
 
   std::sort(testSubject2.begin(), testSubject2.end());
   EXPECT_EQ(result, testSubject2[nth]);
