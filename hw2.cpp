@@ -126,40 +126,40 @@ TEST(testPartition, testInPlace) {
   }
 }
 
-// left closed, right open <==> [)
-int select(int array[], int left, int right, int k, int groupSize) {
-  if (right - left < 15) {
-    std::sort(array + left, array + right);
-    return array[k];
+// only accept length dividable by 5
+template <typename Type>
+Type select(Type a[], int size, int index) {
+  if (size <= 50) {
+    std::sort(a, a + size);
+    return a[index];
   }
-  else {
-    int i = 0;
-    int *a = array + left;
-    const int n = right - left;
-    int numGroups = (n + groupSize - 1) / groupSize;
-    const int middle = groupSize / 2;
+  Type *p = a;
 
-    // all treat the last one differently
-    for (i = 0; i + groupSize < n; i += groupSize)
-      std::sort(a + i, a + i + groupSize);
-    const int lastMiddle = (n - i) / 2;
-    std::sort(a + i, a + n);
+  for (int i = 0; i < size/5; ++ i) {
+    const int j = i * 5;
+    std::sort(a + j, a + j + 5);
+    std::swap(p[i], a[j + 2]);
+  }
 
-    for (i = 0; i < numGroups-1; ++ i) {
-      std::swap(a[i], a[i * groupSize + middle]);
-    }
-    std::swap(a[i], a[i * groupSize + lastMiddle]);
+  int mid = select(p, size/5, size/10 + (size / 5) % 2);
 
-    const int pivot = select(array, left, left + numGroups, numGroups/2, groupSize);
-    // implement a partition such to return the position where the pivot is
-    // and left side smaller, right side larger
-    auto dist = ::partition(a, right-left, pivot) + left;
-
-    if (k < dist)
-      return select(array, left, dist, k, groupSize);
+  int i,j,k;
+  i = j = k = 0;
+  for (int iter = 0; iter < size; ++ iter) {
+    if (a[iter] < mid)
+      std::swap(p[i++], a[iter]);
+    else if (a[iter] == mid)
+      ++j;
     else
-      return select(array, dist, right, k, groupSize);
+      ++k;
   }
+
+  if (index < i)
+    return select(p, i, index);
+  else if (index < i + j)
+    return mid;
+  else
+    return select(a + i + j, k, index - i - j);
 }
 
 TEST(SELECT, NTH) {
@@ -170,7 +170,7 @@ TEST(SELECT, NTH) {
     testSubject1.insert(testSubject1.end(), testSubject2.begin(), testSubject2.end());
     testSubject2 = testSubject1;
     const int nth = i;
-    auto result = select(testSubject1.data(), 0, testSubject1.size(), nth, 5);
+    auto result = select(testSubject1.data(), testSubject1.size(), nth);
 
     std::sort(testSubject2.begin(), testSubject2.end());
     EXPECT_EQ(result, testSubject2[nth]);
@@ -187,7 +187,7 @@ TEST(SELECT, NTH_SAME_ELEMENT) {
     testSubject1.insert(testSubject1.end(), testSubject2.begin(), testSubject2.end());
     testSubject2 = testSubject1;
     const int nth = i;
-    auto result = select(testSubject1.data(), 0, testSubject1.size(), nth, 5);
+    auto result = select(testSubject1.data(), testSubject1.size(), nth);
 
     std::sort(testSubject2.begin(), testSubject2.end());
     EXPECT_EQ(result, testSubject2[nth]);
@@ -197,27 +197,27 @@ TEST(SELECT, NTH_SAME_ELEMENT) {
 }
 
 
-// TEST(SELECT, RANDOM_NTH) {
-//   std::vector<int> testSubject1;
-//   std::vector<int> testSubject2;
-//   const int sep = 500;
-//   std::random_device rd;
+TEST(SELECT, RANDOM_NTH) {
+  std::vector<int> testSubject1;
+  std::vector<int> testSubject2;
+  const int sep = 5000;
+  std::random_device rd;
 
-//   for (int n = 0; n < sep; ++ n) {
-//     std::uniform_int_distribution<int> distrib1(sep * n, sep * 2 * n);
-//     std::uniform_int_distribution<int> distrib2(sep * n * 3, sep * n * 4);
-//     testSubject1.emplace_back(distrib1(rd));
-//     testSubject2.emplace_back(distrib2(rd));
-//   }
-//   testSubject1.insert(testSubject1.end(), testSubject2.begin(), testSubject2.end());
-//   testSubject2 = testSubject1;
+  for (int n = 0; n < sep; ++ n) {
+    std::uniform_int_distribution<int> distrib1(sep * n, sep * 2 * n);
+    std::uniform_int_distribution<int> distrib2(sep * n * 3, sep * n * 4);
+    testSubject1.emplace_back(distrib1(rd));
+    testSubject2.emplace_back(distrib2(rd));
+  }
+  testSubject1.insert(testSubject1.end(), testSubject2.begin(), testSubject2.end());
+  testSubject2 = testSubject1;
 
-//   const int nth = 0;
-//   auto result = select(testSubject1.data(), 0, testSubject1.size(), nth, 5);
+  const int nth = 0;
+  auto result = select(testSubject1.data(), testSubject1.size(), nth);
 
-//   std::sort(testSubject2.begin(), testSubject2.end());
-//   EXPECT_EQ(result, testSubject2[nth]);
-// }
+  std::sort(testSubject2.begin(), testSubject2.end());
+  EXPECT_EQ(result, testSubject2[nth]);
+}
 
 template <typename Type>
 void mid(Type A[], int i, Type p[]) {
@@ -226,6 +226,7 @@ void mid(Type A[], int i, Type p[]) {
   p[i] = A[j+2];
 }
 
+// One major fallback of this code is its dynamical allocation, without delete
 template <typename Type>
 Type Select(Type A[], int n, int k) {
   int i, j, s, t;
@@ -255,7 +256,7 @@ Type Select(Type A[], int n, int k) {
   }
   if (i>k)
     return Select(p,i,k);
-  else if (i+j>=k)
+  else if (i+j>k)
     return m;
   else
     return Select(r,s,k-i-j);
@@ -281,7 +282,7 @@ TEST(NEW_SELECT, NTH) {
 TEST(NEW_SELECT, RANDOM_NTH) {
   std::vector<int> testSubject1;
   std::vector<int> testSubject2;
-  const int sep = 500000;
+  const int sep = 50000;
   std::random_device rd;
 
   for (int n = 0; n < sep; ++ n) {
