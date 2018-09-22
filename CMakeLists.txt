@@ -33,6 +33,11 @@ add_executable(hw2.out hw2.cpp)
 target_include_directories(hw2.out PRIVATE ${GTEST_INCLUDE_DIR})
 target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
 
+#enable_language(C ASM_NASM)
+#set_source_files_properties(src/avx.asm PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
+
+#add_executable(avx.out src/AVX.cpp src/avx.asm)
+add_executable(avx.out src/AVX.cpp)
 
 
 
