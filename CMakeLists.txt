@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5.1)
 if(MSVC)
   add_compile_options(/W3 /WX)
 else()
-  add_compile_options(-W -Wall -Werror)
+  #add_compile_options(-W -Wall -Werror)
   #add_compile_options(-W -Wall)
 endif()
 
@@ -17,27 +17,27 @@ find_package( GTest REQUIRED )
 find_package( benchmark REQUIRED )
 
 set(CMAKE_CXX_STANDARD 11)
-#add_subdirectory(abseil-cpp)
+add_subdirectory(abseil-cpp)
 
-# add_executable(testing.out test.cpp)
-# target_include_directories(testing.out PRIVATE
-#   ${Protobuf_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${TensorFlow_INCLUDE_DIR})
-# target_link_libraries(testing.out PRIVATE
-#   ${TensorFlow_LIBRARY} absl::base)
+add_executable(testing.out test.cpp)
+target_include_directories(testing.out PRIVATE
+  ${Protobuf_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${TensorFlow_INCLUDE_DIR})
+target_link_libraries(testing.out PRIVATE
+  ${TensorFlow_LIBRARY} absl::base)
 
 # add_executable(hw.out hw.cpp)
 # target_include_directories(hw.out PRIVATE ${GTEST_INCLUDE_DIR})
 # target_link_libraries(hw.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
 
-add_executable(hw2.out hw2.cpp)
-target_include_directories(hw2.out PRIVATE ${GTEST_INCLUDE_DIR})
-target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
+# add_executable(hw2.out hw2.cpp)
+# target_include_directories(hw2.out PRIVATE ${GTEST_INCLUDE_DIR})
+# target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
 
 #enable_language(C ASM_NASM)
 #set_source_files_properties(src/avx.asm PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
 
 #add_executable(avx.out src/AVX.cpp src/avx.asm)
-add_executable(avx.out src/AVX.cpp)
+#add_executable(avx.out src/AVX.cpp)
 
 
 
