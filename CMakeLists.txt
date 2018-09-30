@@ -19,11 +19,11 @@ find_package( benchmark REQUIRED )
 set(CMAKE_CXX_STANDARD 11)
 #add_subdirectory(abseil-cpp)
 
-# add_executable(testing.out test.cpp)
-# target_include_directories(testing.out PRIVATE
-#   ${Protobuf_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${TensorFlow_INCLUDE_DIR})
-# target_link_libraries(testing.out PRIVATE
-#   ${TensorFlow_LIBRARY} absl::base)
+add_executable(testing.out test.cpp)
+target_include_directories(testing.out PRIVATE
+  ${Protobuf_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${TensorFlow_INCLUDE_DIR} "${CMAKE_CURRENT_LIST_DIR}/include")
+target_link_libraries(testing.out PRIVATE
+  ${TensorFlow_LIBRARY} ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
 
 # add_executable(hw.out hw.cpp)
 # target_include_directories(hw.out PRIVATE ${GTEST_INCLUDE_DIR})

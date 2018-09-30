@@ -126,28 +126,47 @@
 //   }
 // };
 
-#include <stdio.h>
-#include <time.h>
-#define SIZE 25600
-int a[SIZE], b[SIZE], c[SIZE];
-void foo () {
-  int i,j;
-  for (j=0; j<SIZE; ++j) {
-    for (i=0; i<SIZE; i++){
-      a[i] = b[i] + c[i];
-    }
-  }
+// #include <stdio.h>
+// #include <time.h>
+// #define SIZE 25600
+// int a[SIZE], b[SIZE], c[SIZE];
+// void foo () {
+//   int i,j;
+//   for (j=0; j<SIZE; ++j) {
+//     for (i=0; i<SIZE; i++){
+//       a[i] = b[i] + c[i];
+//     }
+//   }
 
-}
+// }
 
-int main() {
-  clock_t t;
-  t = clock();
-  foo();
-  t = clock() - t;
-  float usedTime = ((float)t)/CLOCKS_PER_SEC;
-  long long int numComp = SIZE * SIZE;
-  printf("%f FLOPS", numComp / usedTime / 1024 / 1024 / 1024);
+// int main() {
+//   clock_t t;
+//   t = clock();
+//   foo();
+//   t = clock() - t;
+//   float usedTime = ((float)t)/CLOCKS_PER_SEC;
+//   long long int numComp = SIZE * SIZE;
+//   printf("%f FLOPS", numComp / usedTime / 1024 / 1024 / 1024);
 
-  return 0;
+//   return 0;
+// }
+
+#include <gtest/gtest.h>
+#include "viterbi.hpp"
+
+TEST(VITERBIALGO, TEST1) {
+  std::map<std::string, float> probDict = {std::make_pair("good", 0.2),
+                                           std::make_pair("morning", 0.2),
+                                           std::make_pair("sir", 0.2),
+                                           std::make_pair("could", 0.2),
+                                           std::make_pair("please", 0.2)};
+
+  std::string sentence("goodmorningMrBlue");
+
+  auto strVec = viterbiSegment(sentence, probDict);// << '\n';
+
+  for (const auto &str : strVec)
+    std::cout << str << ' ';
+  std::cout << '\n';
 }
