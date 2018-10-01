@@ -81,7 +81,7 @@ viterbiSegment(const std::string &sentence,
   std::stack<Integral> segmentPoint;
   segmentPoint.push(static_cast<Integral>(sentence.size()));
 
-  for (int i = lastSegment.back(); i > 0; i = lastSegment[i])
+  for (Integral i = lastSegment.back(); i > 0; i = lastSegment[i])
     segmentPoint.push(lastSegment[i]);
 
   std::vector<std::string> result;

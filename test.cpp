@@ -156,11 +156,18 @@
 #include "viterbi.hpp"
 
 TEST(VITERBIALGO, TEST1) {
-  std::map<std::string, float> probDict = {std::make_pair("good", 0.2),
-                                           std::make_pair("morning", 0.2),
-                                           std::make_pair("sir", 0.2),
-                                           std::make_pair("could", 0.2),
-                                           std::make_pair("please", 0.2)};
+  // std::map<std::string, float> probDict = {std::make_pair("good", 0.2),
+  //                                          std::make_pair("morning", 0.2),
+  //                                          std::make_pair("sir", 0.2),
+  //                                          std::make_pair("could", 0.2),
+  //                                          std::make_pair("please", 0.2)};
+
+  std::map<std::string, float> probDict = {{"good", 0.2},
+                                           {"morning", 0.2},
+                                           {"sir", 0.2},
+                                           {"could", 0.2},
+                                           {"please", 0.2}};
+
 
   std::string sentence("goodmorningMrBlue");
 
