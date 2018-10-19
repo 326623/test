@@ -12,18 +12,24 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules/tensorflo
 
 find_package( TensorFlow REQUIRED )
 find_package( Eigen3 REQUIRED )
+
 find_package( Protobuf REQUIRED )
 find_package( GTest REQUIRED )
 find_package( benchmark REQUIRED )
+find_package( OpenMP REQUIRED )
 
 set(CMAKE_CXX_STANDARD 11)
 #add_subdirectory(abseil-cpp)
 
-add_executable(testing.out test.cpp)
-target_include_directories(testing.out PRIVATE
-  ${Protobuf_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${TensorFlow_INCLUDE_DIR} "${CMAKE_CURRENT_LIST_DIR}/include")
-target_link_libraries(testing.out PRIVATE
-  ${TensorFlow_LIBRARY} ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
+add_executable ( readConcurrent test.cpp )
+target_link_libraries ( readConcurrent ${OpenMP_CXX_FLAGS} )
+target_compile_options ( readConcurrent PRIVATE ${OpenMP_CXX_FLAGS} )
+
+# add_executable ( testing.out test.cpp )
+# target_include_directories(testing.out PRIVATE
+#   ${Protobuf_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${TensorFlow_INCLUDE_DIR} "${CMAKE_CURRENT_LIST_DIR}/include")
+# target_link_libraries(testing.out PRIVATE
+#   ${TensorFlow_LIBRARY} ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
 
 # add_executable(hw.out hw.cpp)
 # target_include_directories(hw.out PRIVATE ${GTEST_INCLUDE_DIR})

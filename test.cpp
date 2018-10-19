@@ -152,28 +152,48 @@
 //   return 0;
 // }
 
-#include <gtest/gtest.h>
-#include "viterbi.hpp"
+// #include <gtest/gtest.h>
+// #include "viterbi.hpp"
 
-TEST(VITERBIALGO, TEST1) {
-  // std::map<std::string, float> probDict = {std::make_pair("good", 0.2),
-  //                                          std::make_pair("morning", 0.2),
-  //                                          std::make_pair("sir", 0.2),
-  //                                          std::make_pair("could", 0.2),
-  //                                          std::make_pair("please", 0.2)};
+// TEST(VITERBIALGO, TEST1) {
+//   // std::map<std::string, float> probDict = {std::make_pair("good", 0.2),
+//   //                                          std::make_pair("morning", 0.2),
+//   //                                          std::make_pair("sir", 0.2),
+//   //                                          std::make_pair("could", 0.2),
+//   //                                          std::make_pair("please", 0.2)};
 
-  std::map<std::string, float> probDict = {{"good", 0.2},
-                                           {"morning", 0.2},
-                                           {"sir", 0.2},
-                                           {"could", 0.2},
-                                           {"please", 0.2}};
+//   std::map<std::string, float> probDict = {{"good", 0.2},
+//                                            {"morning", 0.2},
+//                                            {"sir", 0.2},
+//                                            {"could", 0.2},
+//                                            {"please", 0.2}};
 
 
-  std::string sentence("goodmorningMrBlue");
+//   std::string sentence("goodmorningMrBlue");
 
-  auto strVec = viterbiSegment(sentence, probDict);// << '\n';
+//   auto strVec = viterbiSegment(sentence, probDict);// << '\n';
 
-  for (const auto &str : strVec)
-    std::cout << str << ' ';
-  std::cout << '\n';
+//   for (const auto &str : strVec)
+//     std::cout << str << ' ';
+//   std::cout << '\n';
+// }
+#include <fstream>
+#include <iostream>
+#include <atomic>
+
+int main(int argc, char **argv) {
+  if (argc == 2) {
+    std::ifstream inputStream(argv[1]);
+    std::atomic<long long> lineNum{0};
+#pragma omp parallel shared(std::cout, lineNum, inputStream) default(none)
+    {
+      std::string lineBuffer;
+      while (std::getline(inputStream, lineBuffer)) {
+        ++lineNum;
+        std::cout << lineNum << ": " << lineBuffer << '\n';
+      }
+    }
+  }
+  else return 1;
+  return 0;
 }
