@@ -181,20 +181,40 @@
 #include <iostream>
 #include <atomic>
 #include <regex>
+#include <unordered_map>
+#include <benchmark/benchmark.h>
 
-int main() {
-  std::regex re("[a-zA-Z]+|[0-9]+");
-  std::string s = "http://davidroyko.webs.com/hrreuniontrib.htm/%&$@";
-  auto words_begin = std::sregex_iterator(s.begin(), s.end(), re);
-  auto words_end = std::sregex_iterator();
+// Int main() {
+//   // std::regex re("[a-zA-Z]+|[0-9]+");
+//   // std::string s = "http://davidroyko.webs.com/hrreuniontrib.htm/%&$@";
+//   // auto words_begin = std::sregex_iterator(s.begin(), s.end(), re);
+//   // auto words_end = std::sregex_iterator();
 
-  std::size_t last = 0;
-  while (words_begin != words_end) {
-    std::cout << words_begin->format("$`") << ' ' << words_begin->format("$&") << ' ';
-    last = words_begin->position() + words_begin->length();
-    ++words_begin;
-  }
-  if (last != s.length()) {
-    std::cout << s.substr(last) << '\n';
+//   // std::size_t last = 0;
+//   // while (words_begin != words_end) {
+//   //   std::cout << words_begin->format("$`") << ' ' << words_begin->format("$&") << ' ';
+//   //   last = words_begin->position() + words_begin->length();
+//   //   ++words_begin;
+//   // }
+//   // if (last != s.length()) {
+//   //   std::cout << s.substr(last) << '\n';
+//   // }
+
+//   std::unordered_map<std::string, long> dictionary;
+//   std::hash<std::string> hashFun = dictionary.hash_function();
+//   std::cout << hashFun("sssssss") << '\n';
+// }
+
+static void BM_Simple(benchmark::State &state) {
+  std::unordered_map<std::string, long> dictionary;
+  //auto hashFun =  dictionary.hash_function();
+  auto i = 0;
+  for (auto _ : state) {
+    ++i;
+    //hashFun("AnyStringAtAllPleaseSuggestSomethingLongerThanThatWouldYouMind");
   }
 }
+
+BENCHMARK(BM_Simple);
+
+BENCHMARK_MAIN();

@@ -21,9 +21,9 @@ find_package( OpenMP REQUIRED )
 set(CMAKE_CXX_STANDARD 11)
 #add_subdirectory(abseil-cpp)
 
-add_executable ( readConcurrent test.cpp )
-target_link_libraries ( readConcurrent ${OpenMP_CXX_FLAGS} )
-target_compile_options ( readConcurrent PRIVATE ${OpenMP_CXX_FLAGS} )
+add_executable ( testing.out test.cpp )
+target_link_libraries ( testing.out ${OpenMP_CXX_FLAGS} benchmark::benchmark )
+target_compile_options ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} )
 
 # add_executable ( testing.out test.cpp )
 # target_include_directories(testing.out PRIVATE
