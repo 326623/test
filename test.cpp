@@ -180,20 +180,21 @@
 #include <fstream>
 #include <iostream>
 #include <atomic>
+#include <regex>
 
-int main(int argc, char **argv) {
-  if (argc == 2) {
-    std::ifstream inputStream(argv[1]);
-    std::atomic<long long> lineNum{0};
-#pragma omp parallel shared(std::cout, lineNum, inputStream) default(none)
-    {
-      std::string lineBuffer;
-      while (std::getline(inputStream, lineBuffer)) {
-        ++lineNum;
-        std::cout << lineNum << ": " << lineBuffer << '\n';
-      }
-    }
+int main() {
+  std::regex re("[a-zA-Z]+|[0-9]+");
+  std::string s = "http://davidroyko.webs.com/hrreuniontrib.htm/%&$@";
+  auto words_begin = std::sregex_iterator(s.begin(), s.end(), re);
+  auto words_end = std::sregex_iterator();
+
+  std::size_t last = 0;
+  while (words_begin != words_end) {
+    std::cout << words_begin->format("$`") << ' ' << words_begin->format("$&") << ' ';
+    last = words_begin->position() + words_begin->length();
+    ++words_begin;
   }
-  else return 1;
-  return 0;
+  if (last != s.length()) {
+    std::cout << s.substr(last) << '\n';
+  }
 }
