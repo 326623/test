@@ -10,10 +10,12 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules/tensorflow-cmake"
   )
 
+# tensorflow dependency
 find_package( TensorFlow REQUIRED )
 find_package( Eigen3 REQUIRED )
-
 find_package( Protobuf REQUIRED )
+
+find_package ( Vc 1.4 REQUIRED )
 find_package( GTest REQUIRED )
 find_package( benchmark REQUIRED )
 find_package( OpenMP REQUIRED )
@@ -22,8 +24,16 @@ set(CMAKE_CXX_STANDARD 11)
 #add_subdirectory(abseil-cpp)
 
 add_executable ( testing.out test.cpp )
-target_link_libraries ( testing.out ${OpenMP_CXX_FLAGS} benchmark::benchmark )
-target_compile_options ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} )
+target_link_libraries ( testing.out ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES} )
+target_compile_options ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} ${Vc_ALL_FLAGS} "-O3" )
+target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
+
+#message ( STATUS ${Vc_LIB_DIR} )
+#message ( STATUS ${Vc_INCLUDE_DIR} )
+# message ( STATUS ${Vc_DEFINITIONS} )
+# message ( STATUS ${Vc_COMPILER_FLAGS} )
+# message ( STATUS ${Vc_ARCHITECTURE_FLAGS} )
+# message ( STATUS ${Vc_ALL_FLAGS} )
 
 # add_executable ( testing.out test.cpp )
 # target_include_directories(testing.out PRIVATE
@@ -43,7 +53,7 @@ target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES}
 #set_source_files_properties(src/avx.asm PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
 
 #add_executable(avx.out src/AVX.cpp src/avx.asm)
-add_executable(avx.out src/AVX.cpp)
+#add_executable(avx.out src/AVX.cpp)
 
 
 
