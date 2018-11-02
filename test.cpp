@@ -206,72 +206,88 @@
 //   std::cout << hashFun("sssssss") << '\n';
 // }
 
-using Vc::float_v;
+// using Vc::float_v;
 
-static constexpr std::size_t N = 10240000, PrintStep = 1000000;
+// static constexpr std::size_t N = 10240000, PrintStep = 1000000;
 
-static constexpr float epsilon = 1e-7f;
-static constexpr float lower = 0.f;
-static constexpr float upper = 40000.f;
-static constexpr float h = (upper - lower) / N;
+// static constexpr float epsilon = 1e-7f;
+// static constexpr float lower = 0.f;
+// static constexpr float upper = 40000.f;
+// static constexpr float h = (upper - lower) / N;
 
-static inline float fu(float x) { return ( std::sin(x) ); }
-static inline float dfu(float x) { return ( std::cos(x) ); }
+// static inline float fu(float x) { return ( std::sin(x) ); }
+// static inline float dfu(float x) { return ( std::cos(x) ); }
 
-static inline Vc::float_v fu(Vc::float_v::AsArg x) {
-  #ifdef USE_SCALAR_SINCOS
-  Vc::float_v r;
-  for (size_t i = 0; i < Vc:float_v::Size; ++ i) {
-    r[i] = std::sin(x[i]);
+// static inline Vc::float_v fu(Vc::float_v::AsArg x) {
+//   #ifdef USE_SCALAR_SINCOS
+//   Vc::float_v r;
+//   for (size_t i = 0; i < Vc:float_v::Size; ++ i) {
+//     r[i] = std::sin(x[i]);
+//   }
+//   return r;
+//   #else
+//   return Vc::sin(x);
+//   #endif
+// }
+
+// // Passing by value is good enough, since sane compiler
+// // would just pass value to register, but using reference is overkill
+// // since it would require stack operation
+// static inline Vc::float_v dfu(Vc::float_v::AsArg x) {
+//   #ifdef USE_SCALAR_SINCOS
+//   Vc::float_v r;
+//   for (size_t i = 0; i < Vc::float_v::Size; ++ i) {
+//     r[i] = std::cos(x[i]);
+//   }
+//   return r;
+//   #else
+//   return Vc::cos(x);
+//   #endif
+// }
+
+// static void BM_Simple(benchmark::State &state) {
+//   //std::unordered_map<std::string, long> dictionary;
+//   //auto hashFun =  dictionary.hash_function();
+//   //std::ios::sync_with_stdio(false);
+//   float_v f = 1;
+//   for (auto _ : state) {
+//     for (size_t i = 0; i < Vc::float_v::Size; ++ i) {
+//       //benchmark::DoNotOptimize(std::sin(f[i]));
+//       benchmark::DoNotOptimize(f[i] = f[i] + f[i]);
+//     }
+//     //hashFun("AnyStringAtAllPleaseSuggestSomethingLongerThanThatWouldYouMind");
+//   }
+// }
+
+// static void BM_VC(benchmark::State &state) {
+//   //std::unordered_map<std::string, long> dictionary;
+//   //auto hashFun =  dictionary.hash_function();
+//   //std::ios::sync_with_stdio(false);
+//   float_v f = 1;
+//   for (auto _ : state) {
+//     //    std::cout << fu(f) << '\n';
+//     benchmark::DoNotOptimize(f=f+f);
+//     //hashFun("AnyStringAtAllPleaseSuggestSomethingLongerThanThatWouldYouMind");
+//   }
+// }
+
+// BENCHMARK(BM_Simple);
+// BENCHMARK(BM_VC);
+
+// BENCHMARK_MAIN();
+
+int main() {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+
+  std::poisson_distribution<> d(4);
+
+  std::map<int, int> hist;
+  for (int n = 0; n < 10000; ++ n) {
+    ++hist[d(gen)];
   }
-  return r;
-  #else
-  return Vc::sin(x);
-  #endif
-}
-
-// Passing by value is good enough, since sane compiler
-// would just pass value to register, but using reference is overkill
-// since it would require stack operation
-static inline Vc::float_v dfu(Vc::float_v::AsArg x) {
-  #ifdef USE_SCALAR_SINCOS
-  Vc::float_v r;
-  for (size_t i = 0; i < Vc::float_v::Size; ++ i) {
-    r[i] = std::cos(x[i]);
-  }
-  return r;
-  #else
-  return Vc::cos(x);
-  #endif
-}
-
-static void BM_Simple(benchmark::State &state) {
-  //std::unordered_map<std::string, long> dictionary;
-  //auto hashFun =  dictionary.hash_function();
-  //std::ios::sync_with_stdio(false);
-  float_v f = 1;
-  for (auto _ : state) {
-    for (size_t i = 0; i < Vc::float_v::Size; ++ i) {
-      //benchmark::DoNotOptimize(std::sin(f[i]));
-      benchmark::DoNotOptimize(f[i] = f[i] + f[i]);
-    }
-    //hashFun("AnyStringAtAllPleaseSuggestSomethingLongerThanThatWouldYouMind");
+  for (auto p : hist) {
+    std::cout << p.first
+              <<  ' ' << std::string(p.second/100, '*') << '\n';
   }
 }
-
-static void BM_VC(benchmark::State &state) {
-  //std::unordered_map<std::string, long> dictionary;
-  //auto hashFun =  dictionary.hash_function();
-  //std::ios::sync_with_stdio(false);
-  float_v f = 1;
-  for (auto _ : state) {
-    //    std::cout << fu(f) << '\n';
-    benchmark::DoNotOptimize(f=f+f);
-    //hashFun("AnyStringAtAllPleaseSuggestSomethingLongerThanThatWouldYouMind");
-  }
-}
-
-BENCHMARK(BM_Simple);
-BENCHMARK(BM_VC);
-
-BENCHMARK_MAIN();
