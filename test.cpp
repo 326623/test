@@ -276,18 +276,121 @@
 
 // BENCHMARK_MAIN();
 
-int main() {
-  std::random_device rd;
-  std::mt19937 gen(rd());
+// int main() {
+//   std::random_device rd;
+//   std::mt19937 gen(rd());
 
-  std::poisson_distribution<> d(4);
+//   std::poisson_distribution<> d(4);
 
-  std::map<int, int> hist;
-  for (int n = 0; n < 10000; ++ n) {
-    ++hist[d(gen)];
-  }
-  for (auto p : hist) {
-    std::cout << p.first
-              <<  ' ' << std::string(p.second/100, '*') << '\n';
-  }
+//   std::map<int, int> hist;
+//   for (int n = 0; n < 10000; ++ n) {
+//     ++hist[d(gen)];
+//   }
+//   for (auto p : hist) {
+//     std::cout << p.first
+//               <<  ' ' << std::string(p.second/100, '*') << '\n';
+//   }
+// }
+
+// #include <ortools/linear_solver/linear_solver.h>
+// #include <ortools/linear_solver/linear_solver.pb.h>
+
+// namespace operations_research {
+//   void RunTest(
+//     MPSolver::OptimizationProblemType optimization_problem_type) {
+//     MPSolver solver("LinearExample", optimization_problem_type);
+//     const double infinity = solver.infinity();
+//     MPVariable* const x = solver.MakeNumVar(0.0, infinity, "x");
+//     MPVariable* const y = solver.MakeNumVar(0.0, infinity, "y");
+//     // Objective function: 3x + 4y.
+//     MPObjective* const objective = solver.MutableObjective();
+//     objective->SetCoefficient(x, 3);
+//     objective->SetCoefficient(y, 4);
+//     // x + 2y <= 14.
+//     MPConstraint* const c0 = solver.MakeRowConstraint(-infinity, 14.0);
+//     c0->SetCoefficient(x, 1);
+//     c0->SetCoefficient(y, 2);
+
+//     // 3x - y >= 0.
+//     MPConstraint* const c1 = solver.MakeRowConstraint(0.0, infinity);
+//     c1->SetCoefficient(x, 3);
+//     c1->SetCoefficient(y, -1);
+
+//     // x - y <= 2
+//     MPConstraint* const c2 = solver.MakeRowConstraint(-infinity, 2.0);
+//     c2->SetCoefficient(x, 1);
+//     c2->SetCoefficient(y, -1);
+//     printf("\nNumber of variables = %d", solver.NumVariables());
+//     printf("\nNUMber of constraints = %d", solver.NumConstraints());
+//     solver.Solve();
+//     // the value of each variable in the solution.
+//     printf("\nSolution:");
+//     printf("\nx = %.1f", x->solution_value());
+//     printf("\ny = %.1f", y->solution_value());
+
+//     // The objective value of the solution.
+//     printf("\nOptimal objective value = %.1f", objective->Value());
+//     printf("\n");
+//   }
+//   void RunExample() {
+//     RunExample(MPSolver::GLOP_LINEAR_PROGRAMMING);
+//   }
+// }
+
+// int main(int , char** ) {
+//   operations_research::RunExample();
+//   return 0;
+// }
+
+#include "ortools/linear_solver/linear_solver.h"
+#include "ortools/linear_solver/linear_solver.pb.h"
+
+// namespace operations_research {
+//   void RunTest(
+//     MPSolver::OptimizationProblemType optimization_problem_type) {
+//     MPSolver solver("Glop", optimization_problem_type);
+//     const double infinity = solver.infinity();
+//     // Create the variables x and y.
+//     MPVariable* const x = solver.MakeNumVar(-infinity, infinity, "x");
+//     MPVariable* const y = solver.MakeNumVar(-infinity, infinity, "y");
+
+//     // x + 2y <= 14
+//     //MPConstraint* const c0 = solver.MakeRowConstraint(-infinity, 14.0);
+//     // const auto
+//     auto* const c0 = solver.MakeRowConstraint(-infinity, 14.0);
+//     c0->SetCoefficient(x, 1.0);
+//     c0->SetCoefficient(y, 2.0);
+
+//     // 3x - y >= 0
+//     auto* const c1 = solver.MakeRowConstraint(0.0, infinity);
+//     c1->SetCoefficient(x, 3.0);
+//     c1->SetCoefficient(y, -1.0);
+
+//     // x - y <= 2
+//     auto* const c2 = solver.MakeRowConstraint(-infinity, 2.0);
+//     c2->SetCoefficient(x, 1.0);
+//     c2->SetCoefficient(y, -1.0);
+
+//     // Create the objective function, x + y.
+//     MPObjective* const objective = solver.MutableObjective();
+//     objective->SetCoefficient(x, 3.0);
+//     objective->SetCoefficient(y, 4.0);
+//     objective->SetMaximization();
+//     // Call the solver and display the results.
+//     solver.Solve();
+//     printf("\nSolution:");
+//     printf("\nx = %.1f", x->solution_value());
+//     printf("\ny = %.1f", y->solution_value());
+//     printf("\nOptimal objective value = %.1f", objective->Value());
+//     printf("\n");
+//   }
+
+//   void RunExample() {
+//     RunTest(MPSolver::GLOP_LINEAR_PROGRAMMING);
+//   }
+// }
+
+int main(int , char** ) {
+  //operations_research::RunExample();
+  return 0;
 }
