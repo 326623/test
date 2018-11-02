@@ -342,8 +342,9 @@
 //   return 0;
 // }
 
-#include "ortools/linear_solver/linear_solver.h"
-#include "ortools/linear_solver/linear_solver.pb.h"
+// #include <ortools/base/commandlineflags.h>
+// #include "ortools/linear_solver/linear_solver.h"
+// #include "ortools/linear_solver/linear_solver.pb.h"
 
 // namespace operations_research {
 //   void RunTest(
@@ -390,7 +391,19 @@
 //   }
 // }
 
-int main(int , char** ) {
+#include <ortools/base/commandlineflags.h>
+#include <ortools/base/logging.h>
+#include "ortools/linear_solver/linear_solver.h"
+#include "ortools/linear_solver/linear_solver.pb.h"
+
+DEFINE_string(input, "", "Jobshop data file name.");
+
+int main(int argc, char** argv) {
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  if (FLAGS_input.empty()) {
+    LOG(FATAL) << "Please supply a data file with --input=";
+  }
+  std::cout << FLAGS_input << '\n';
   //operations_research::RunExample();
   return 0;
 }
