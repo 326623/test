@@ -15,7 +15,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules/tensorflo
 #find_package( Eigen3 REQUIRED )
 #find_package( Protobuf REQUIRED )
 
-find_package ( Vc 1.4 REQUIRED )
+#find_package( Eigen3 REQUIRED )
+find_package( Vc 1.4 REQUIRED )
 find_package( GTest REQUIRED )
 find_package( benchmark REQUIRED )
 find_package( OpenMP REQUIRED )

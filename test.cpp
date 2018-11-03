@@ -391,19 +391,65 @@
 //   }
 // }
 
-#include <ortools/base/commandlineflags.h>
-#include <ortools/base/logging.h>
-#include "ortools/linear_solver/linear_solver.h"
-#include "ortools/linear_solver/linear_solver.pb.h"
+// #include <ortools/base/commandlineflags.h>
+// #include <ortools/base/logging.h>
+// #include "ortools/linear_solver/linear_solver.h"
+// #include "ortools/linear_solver/linear_solver.pb.h"
 
-DEFINE_string(input, "", "Jobshop data file name.");
+// DEFINE_string(input, "", "Jobshop data file name.");
 
-int main(int argc, char** argv) {
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
-  if (FLAGS_input.empty()) {
-    LOG(FATAL) << "Please supply a data file with --input=";
-  }
-  std::cout << FLAGS_input << '\n';
-  //operations_research::RunExample();
-  return 0;
+// int main(int argc, char** argv) {
+//   gflags::ParseCommandLineFlags(&argc, &argv, true);
+//   if (FLAGS_input.empty()) {
+//     LOG(FATAL) << "Please supply a data file with --input=";
+//   }
+//   std::cout << FLAGS_input << '\n';
+//   //operations_research::RunExample();
+//   return 0;
+// }
+
+// #include <ortools/constraint_solver/constraint_solver.h>
+// #include <ortools/base/logging.h>
+// namespace operations_research {
+//   void pheasant() {
+//     Solver s("pheasant");
+//     IntVar* const p = s.MakeIntVar(0, 20, "pheasant");
+//     IntVar* const r = s.MakeIntVar(0, 20, "rabbit");
+//     IntExpr* const legs = s.MakeSum(s.MakeProd(p, 2), s.MakeProd(r, 4));
+//     IntExpr* const heads = s.MakeSum(p, r);
+//     Constraint* const ct_legs = s.MakeEquality(legs, 56);
+//     Constraint* const ct_heads = s.MakeEquality(heads, 20);
+//     CHECK_EQ(0, 0);
+//     s.AddConstraint(ct_legs);
+//     s.AddConstraint(ct_heads);
+//     DecisionBuilder* const db = s.MakePhase(p, r,
+//                                             Solver::CHOOSE_FIRST_UNBOUND,
+//                                             Solver::ASSIGN_MIN_VALUE);
+//     s.NewSearch(db);
+//     CHECK(s.NextSolution());
+//     LOG(INFO) << "rabbits -> " << r->Value() << ", pheasants -> "
+//               << p->Value();
+//     LOG(INFO) << s.DebugString();
+//     s.EndSearch();
+//   }
+// }
+
+// int main(int , char** ) {
+//   operations_research::pheasant();
+//   return 0;
+// }
+
+#include <iostream>
+#include <Eigen/Dense>
+
+using Eigen::MatrixXd;
+
+int main()
+{
+  MatrixXd m(2, 2);
+  m(0, 0) = 3;
+  m(1, 0) = 2.5;
+  m(0, 1) = -1;
+  m(1, 1) = m(1, 0) + m(0, 1);
+  std::cout << m << '\n';
 }
