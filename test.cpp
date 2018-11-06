@@ -440,16 +440,31 @@
 // }
 
 #include <iostream>
-#include <Eigen/Dense>
+#include <sstream>
+#include <cassert>
+#include <ortools/base/logging.h>
+//#include <Eigen/Dense>
 
-using Eigen::MatrixXd;
+//using Eigen::MatrixXd;
 
 int main()
 {
-  MatrixXd m(2, 2);
-  m(0, 0) = 3;
-  m(1, 0) = 2.5;
-  m(0, 1) = -1;
-  m(1, 1) = m(1, 0) + m(0, 1);
-  std::cout << m << '\n';
+  // MatrixXd m(2, 2);
+  // m(0, 0) = 3;
+  // m(1, 0) = 2.5;
+  // m(0, 1) = -1;
+  // m(1, 1) = m(1, 0) + m(0, 1);
+  // std::cout << m << '\n';
+  auto i = 0ul;
+  std::stringstream ss("1 1");
+  ss >> i >> i >> i;
+  if (!ss) {
+    std::cout << "bad number passed\n";
+  }
+  else {
+    std::cout << "good number passed\n";
+  }
+  //CHECK_EQ(0, 1);
+  assert(0 == 1);
+  std::cout << i << '\n';
 }
