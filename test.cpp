@@ -455,6 +455,7 @@ int main()
   m(0, 2) = true;
   m(2, 3) = true;
   std::cout << (Matrix<double, Dynamic, Dynamic>::Identity(m.rows(), m.cols()) - m).inverse() << '\n';
+  DLOG(INFO) << "Found cookies";
   // MatrixXd m(2, 2);
   // m(0, 0) = 3;
   // m(1, 0) = 2.5;
