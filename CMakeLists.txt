@@ -7,15 +7,14 @@ else()
   #add_compile_options(-W -Wall)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules/tensorflow-cmake"
-  )
+#list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules/tensorflow-cmake")
 
 # tensorflow dependency
 #find_package( TensorFlow REQUIRED )
 #find_package( Eigen3 REQUIRED )
 #find_package( Protobuf REQUIRED )
 
-#find_package( Eigen3 REQUIRED )
+find_package( Eigen3 3.3 REQUIRED NO_MODULE )
 find_package( Vc 1.4 REQUIRED )
 find_package( GTest REQUIRED )
 find_package( benchmark REQUIRED )
@@ -27,7 +26,7 @@ set(CMAKE_CXX_STANDARD 11)
 #add_subdirectory(abseil-cpp)
 
 add_executable ( testing.out test.cpp )
-target_link_libraries ( testing.out ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES} ortools::ortools )
+target_link_libraries ( testing.out PRIVATE Eigen3::Eigen ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES} ortools::ortools  )
 target_compile_options ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} ${Vc_ALL_FLAGS} "-O3" )
 target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
 
