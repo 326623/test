@@ -448,14 +448,41 @@
 using namespace Eigen;
 //using Eigen::MatrixXd;
 
+template <typename ... Args>
+std::string numPacking() {
+  return "";
+}
+
+template <typename IndexType, typename ... Args>
+std::string numPacking(IndexType head, Args ... tail) {
+  if (sizeof...(tail))
+    return std::to_string(head) + ',' + numPacking(tail...);
+  else
+    return std::to_string(head);
+}
+
+template <typename ... IndexTypes>
+std::string numToBracket(IndexTypes ... indices) {
+  return '[' + numPacking(indices...) + ']';
+}
+
+template <typename ... IndexTypes>
+std::string makeName(std::string &&prefix, IndexTypes ... nums) {
+  if (sizeof...(nums))
+    return prefix + '_' + numToBracket(nums...);
+  else
+    return prefix;
+}
+
 int main()
 {
-  Matrix<double, Dynamic, Dynamic> m(4, 4);
-  m(0, 1) = true;
-  m(0, 2) = true;
-  m(2, 3) = true;
-  std::cout << (Matrix<double, Dynamic, Dynamic>::Identity(m.rows(), m.cols()) - m).inverse() << '\n';
-  DLOG(INFO) << "Found cookies";
+  std::cout << makeName("machine", 1, 2) << '\n';
+  // Matrix<double, Dynamic, Dynamic> m(4, 4);
+  // m(0, 1) = true;
+  // m(0, 2) = true;
+  // m(2, 3) = true;
+  // std::cout << (Matrix<double, Dynamic, Dynamic>::Identity(m.rows(), m.cols()) - m).inverse() << '\n';
+  // DLOG(INFO) << "Found cookies";
   // MatrixXd m(2, 2);
   // m(0, 0) = 3;
   // m(1, 0) = 2.5;
