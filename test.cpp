@@ -474,6 +474,18 @@ std::string makeName(std::string &&prefix, IndexTypes ... nums) {
     return prefix;
 }
 
+template <typename I, typename P>
+I stable_partition(I f, I l, P p) {
+  auto n = l - f;
+  // return the first element that returns false from p
+  if (n == 0) return f;
+  if (n == 1) return f + p(*f); // return true, skip to next
+
+  auto m = f + (n / 2);
+  return std::rotate(stable_partition(f, m), m,
+                     stable_partition(m+1, l));
+}
+
 int main()
 {
   std::cout << makeName("machine", 1, 2) << '\n';
