@@ -83,29 +83,86 @@ text = soup.get_text()
 lines = (line.strip() for line in text.splitlines())
 chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
 text = '\n'.join(chunk for chunk in chunks if chunk)
-#print(text)
-ex = text
 
-# ex = 'European authorities fined Google a record $5.1 billion on Wednesday for abusing its power in the mobile phone market and ordered the company to alter its practices'
+import spacy
+from spacy import displacy
+from spacy.pipeline import EntityRecognizer
 
-def preprocess(sent):
-    sent = nltk.word_tokenize(sent)
-    return nltk.pos_tag(sent)
+nlp = spacy.load('en_core_web_sm')
+ner = EntityRecognizer(nlp.vocab)
+doc = nlp(text)
+# with open('test.html', 'w') as f:
+#     f.write(html)
+# res = []
+collect = []
+for sent in doc.sents:
+    collection = dict()
+    for entity in sent.ents:
+        if entity.label_ in {'LOC', 'GPE', 'PERSON', 'ORG'} and \
+           entity.text != '\n':
+            if entity.label_ in collection:
+                collection[entity.label_].append(entity.text)
+            else:
+                collection[entity.label_] = [entity.text]
+    if len(collection) != 0:
+        collect.append(collection)
 
-sent = preprocess(ex)
-entities = nltk.chunk.ne_chunk(sent)
+print(collect)
+for collection in collect:
+    for person in collection.get('PERSON', []):
+        for comp in collection.get('ORG', []):
+            print((person, 'work in' ,comp))
+    for comp in collection.get('ORG', []):
+        for location in (collection.get('GPE', []) +
+                         collection.get('LOC', [])):
+            print((comp, 'located in' ,location))
 
-from nltk.sem import relextract
-pairs = relextract.tree2semi_rel(entities)
-reldicts = relextract.semi_rel2reldict(pairs)
-# for k, v in sorted(reldicts[0].items()):
-#     print(k, '=>', v);
+# for entity in doc.ents:
+#     if entity.label_ in {'LOC', 'GPE', 'PERSON', 'ORG'}:
+#         if  entity.text == '\n':
+#             print()
+#         else:
+#             print(entity.text, entity.label_)
 
-import re
+# from nltk.tag import CRFTagger
+# def preprocess(sent):
+#     sents = nltk.sent_tokenize(sent)
+#     for i in range(len(sents)):
+#         sents[i] = nltk.word_tokenize(sents[i])
+#         sents[i] = nltk.pos_tag(sents[i])
+#     return sents
 
-IN = re.compile(r'.*\bin\b(?!\b.+ing\b)')
+# sents = preprocess(text)
+# entities = nltk.ne_chunk_sents(sents)
 
-for rel in relextract.extract_rels('ORG', 'LOC', reldicts, )
+# from nltk.sem import relextract
+# pairs = []
+# for e in entities:
+#     pairs.append(relextract.tree2semi_rel(e))
+
+# reldicts = []
+# for p in pairs:
+#     reldicts.append(relextract.semi_rel2reldict(p))
+
+# for rel in reldicts:
+#     for r in rel:
+#         print(r['subjsym'], '=>', r['filler'], '=>', r['objsym'])
+
+
+
+# for r in reldicts:
+#     print(r['subjtext'])
+#     print(r['filler'])
+#     print(r['objtext'])
+
+# import re
+
+# IN = re.compile(r'.*\bin\b(?!\b.+ing\b)')
+
+# for rel in relextract.extract_rels('ORG', 'LOC', reldicts,
+#                                    corpus='ieer', pattern=IN):
+#     print(rel)
+
 
 # for s, tree in pairs:
 #     #print(s[-5:], tree)
