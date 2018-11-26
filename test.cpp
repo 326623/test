@@ -445,50 +445,70 @@
 #include <ortools/base/logging.h>
 #include <Eigen/Dense>
 
-using namespace Eigen;
+//using namespace Eigen;
 //using Eigen::MatrixXd;
 
-template <typename ... Args>
-std::string numPacking() {
-  return "";
-}
+// template <typename ... Args>
+// std::string numPacking() {
+//   return "";
+// }
 
-template <typename IndexType, typename ... Args>
-std::string numPacking(IndexType head, Args ... tail) {
-  if (sizeof...(tail))
-    return std::to_string(head) + ',' + numPacking(tail...);
-  else
-    return std::to_string(head);
-}
+// template <typename IndexType, typename ... Args>
+// std::string numPacking(IndexType head, Args ... tail) {
+//   if (sizeof...(tail))
+//     return std::to_string(head) + ',' + numPacking(tail...);
+//   else
+//     return std::to_string(head);
+// }
 
-template <typename ... IndexTypes>
-std::string numToBracket(IndexTypes ... indices) {
-  return '[' + numPacking(indices...) + ']';
-}
+// template <typename ... IndexTypes>
+// std::string numToBracket(IndexTypes ... indices) {
+//   return '[' + numPacking(indices...) + ']';
+// }
 
-template <typename ... IndexTypes>
-std::string makeName(std::string &&prefix, IndexTypes ... nums) {
-  if (sizeof...(nums))
-    return prefix + '_' + numToBracket(nums...);
-  else
-    return prefix;
-}
+// template <typename ... IndexTypes>
+// std::string makeName(std::string &&prefix, IndexTypes ... nums) {
+//   if (sizeof...(nums))
+//     return prefix + '_' + numToBracket(nums...);
+//   else
+//     return prefix;
+// }
 
-template <typename I, typename P>
-I stable_partition(I f, I l, P p) {
-  auto n = l - f;
-  // return the first element that returns false from p
-  if (n == 0) return f;
-  if (n == 1) return f + p(*f); // return true, skip to next
+// template <typename I, typename P>
+// I stable_partition(I f, I l, P p) {
+//   auto n = l - f;
+//   // return the first element that returns false from p
+//   if (n == 0) return f;
+//   if (n == 1) return f + p(*f); // return true, skip to next
 
-  auto m = f + (n / 2);
-  return std::rotate(stable_partition(f, m), m,
-                     stable_partition(m+1, l));
+//   auto m = f + (n / 2);
+//   return std::rotate(stable_partition(f, m), m,
+//                      stable_partition(m+1, l));
+// }
+
+template <typename Integral>
+void permutation(Integral k, std::vector<Integral> &xs) {
+
+  const auto n = static_cast<Integral>(xs.size());
+  if (k == n) {
+    for (const auto &x: xs)
+      std::cout << x << ' ';
+    std::cout << '\n';
+  }
+  else {
+    for (Integral i = k; i < n; ++ i) {
+      std::swap(xs[k], xs[i]);
+      permutation(k+1, xs);
+      std::swap(xs[k], xs[i]);
+    }
+  }
 }
 
 int main()
 {
-  std::cout << makeName("machine", 1, 2) << '\n';
+  std::vector<int> xs = {1, 2, 3, 4};
+  permutation(0, xs);
+  //std::cout << makeName("machine", 1, 2) << '\n';
   // Matrix<double, Dynamic, Dynamic> m(4, 4);
   // m(0, 1) = true;
   // m(0, 2) = true;
