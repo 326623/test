@@ -486,28 +486,28 @@
 //                      stable_partition(m+1, l));
 // }
 
-template <typename Integral>
-void permutation(Integral k, std::vector<Integral> &xs) {
+// template <typename Integral>
+// void permutation(Integral k, std::vector<Integral> &xs) {
 
-  const auto n = static_cast<Integral>(xs.size());
-  if (k == n) {
-    for (const auto &x: xs)
-      std::cout << x << ' ';
-    std::cout << '\n';
-  }
-  else {
-    for (Integral i = k; i < n; ++ i) {
-      std::swap(xs[k], xs[i]);
-      permutation(k+1, xs);
-      std::swap(xs[k], xs[i]);
-    }
-  }
-}
+//   const auto n = static_cast<Integral>(xs.size());
+//   if (k == n) {
+//     for (const auto &x: xs)
+//       std::cout << x << ' ';
+//     std::cout << '\n';
+//   }
+//   else {
+//     for (Integral i = k; i < n; ++ i) {
+//       std::swap(xs[k], xs[i]);
+//       permutation(k+1, xs);
+//       std::swap(xs[k], xs[i]);
+//     }
+//   }
+// }
 
-int main()
-{
-  std::vector<int> xs = {1, 2, 3, 4};
-  permutation(0, xs);
+// int main()
+// {
+//   std::vector<int> xs = {1, 2, 3, 4};
+//   permutation(0, xs);
   //std::cout << makeName("machine", 1, 2) << '\n';
   // Matrix<double, Dynamic, Dynamic> m(4, 4);
   // m(0, 1) = true;
@@ -535,4 +535,109 @@ int main()
   // std::cout << i << '\n';
   // auto a = std::numeric_limits<double>::max();
   // std::cout << (a+2312312) << '\n';
+// }
+// #include <chrono>
+// #include <thread>
+// int main() {
+//   std::atomic<int> x{0};
+//   std::atomic<int> y{0};
+
+//   std::thread t1([&]() {
+//                    auto r1 = y.load(std::memory_order_relaxed);
+//                    x.store(r1, std::memory_order_relaxed);
+//                    std::cout << r1 << '\n';
+//                  });
+//   std::thread t2([&]() {
+//                    auto r2 = x.load(std::memory_order_relaxed);
+//                    y.store(42, std::memory_order_relaxed);
+//                    std::cout << r2 << '\n';
+//                  });
+//   t1.join();
+//   t2.join();
+// }
+// #include <vector>
+// #include <iostream>
+// #include <thread>
+// #include <atomic>
+
+// std::atomic<int> cnt = {0};
+
+// void f() {
+//   for (int n = 0; n < 100000; ++ n) {
+//     cnt.fetch_add(1);
+//   }
+// }
+
+// int main() {
+//   std::vector<std::thread> v;
+//   auto start = std::chrono::high_resolution_clock::now();
+//   for (int n = 0; n < 1000; ++ n) {
+//     v.emplace_back(f);
+//   }
+//   for (auto &t : v) {
+//     t.join();
+//   }
+//   auto end = std::chrono::high_resolution_clock::now();
+//   std::cout << std::chrono::duration<double>(end - start).count() << '\n';
+//   std::cout << "Final counter value is " << cnt << '\n';
+// }
+// #include <thread>
+// #include <vector>
+// #include <iostream>
+// #include <atomic>
+
+// std::atomic_flag lock = ATOMIC_FLAG_INIT;
+
+// void f(int n)
+// {
+//   for (int cnt = 0; cnt < 100; ++cnt) {
+//     while (lock.test_and_set(std::memory_order_acquire))  // acquire lock
+//       ; // spin
+//     std::cout << "Output from thread " << n << '\n';
+//     lock.clear(std::memory_order_release);               // release lock
+//   }
+// }
+
+// int main()
+// {
+//   std::vector<std::thread> v;
+//   for (int n = 0; n < 10; ++n) {
+//     v.emplace_back(f, n);
+//   }
+//   for (auto& t : v) {
+//     t.join();
+//   }
+// }
+#include <thread>
+#include <atomic>
+#include <cassert>
+#include <vector>
+
+std::vector<int> data;
+std::atomic<int> flag = {0};
+
+void thread_1() {
+  data.push_back(42);
+  flag.store(1, std::memory_order_relaxed);
+}
+
+void thread_2() {
+  int expected=1;
+  while (!flag.compare_exchange_strong(expected, 2, std::memory_order_relaxed)) {
+    expected = 1;
+  }
+}
+
+void thread_3() {
+  while (flag.load(std::memory_order_relaxed) < 2) ;
+  assert(data.at(0) = 42);
+}
+
+int main() {
+  std::thread c(thread_3);
+  std::thread b(thread_2);
+  //std::thread a(thread_1);
+  c.join();
+  b.join();
+  //a.join();
 }
