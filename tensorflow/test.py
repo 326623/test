@@ -12,7 +12,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 from gcn import BaseModel
-mnist = input_data.read_data_sets('data/mnist', one_hot=True)
+mnist = input_data.read_data_sets('data/mnist', one_hot=False)
 
 train_data = tf.data.Dataset.from_tensor_slices(
     mnist.train.images.astype(np.float32))
@@ -49,7 +49,7 @@ class CNN(BaseModel):
 
             x_2d = tf.reshape(x, [-1, self._K, self._K, self._C])
             y_2d = tf.nn.conv2d(x_2d, W, strides=[1, 1, 1, 1], padding='SAME') + b
-            y_2d = tf.nn.relu(y_2d)
+            y_2d = tf.layers(tf.nn.relu(y_2d), dropout)
 
         with tf.variable_scope('fc1'):
             y = tf.reshape(y_2d, [-1, self._K * self._K * self._F])
@@ -60,14 +60,19 @@ class CNN(BaseModel):
         return y
 
 cnn = CNN(28, 1, 2, 10)
-train_data = train_data.batch(200).prefetch(6)
-train_labels = train_labels.batch(200).prefetch(6)
-val_data = val_data.batch(200).prefetch(6)
-val_labels = val_labels.batch(200).prefetch(6)
+batch_size = 200
+epochs = 2
+train_data = train_data.batch(batch_size).prefetch(6).repeat(epochs)
+train_labels = train_labels.batch(batch_size).prefetch(6).repeat(epochs)
+val_data = val_data.batch(batch_size).prefetch(6)
+val_labels = val_labels.batch(batch_size).prefetch(6)
 data_format = (train_data.output_types, train_data.output_shapes)
 labels_format = (train_labels.output_types, train_labels.output_shapes)
 cnn.build_graph(data_format, labels_format, tf.get_default_graph())
-cnn.fit(train_data, train_labels, val_data, val_labels)
+cnn.fit(train_data, train_labels,
+        val_data, val_labels,
+        train_total=55000*epochs, val_total=5000,
+        batch_size=batch_size)
 # iterator = dataset.make_one_shot_iterator()
 # next_batch = iterator.get_next()
 

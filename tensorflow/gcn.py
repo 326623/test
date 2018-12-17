@@ -1,5 +1,7 @@
 import tensorflow as tf
 from tqdm import tqdm
+import sklearn
+import numpy as np
 
 class BaseModel(object):
     def __init__(self):
@@ -25,12 +27,12 @@ class BaseModel(object):
         try:
             sess.run([data_init_op, labels_init_op])
             while True:
-                batch_labels, batch_loss, batch_prediction = sess.run(
+                batch_labels, batch_loss, batch_predictions = sess.run(
                     [self.pipe_labels, self.op_loss, self.op_prediction], feed_dict)
                 # In the event of large dataset, we may want to write prediction
                 # to save memory, the limitation is the lack of multi-thread support
                 # with the keyword yield
-                yield batch_labels, batch_loss, batch_prediction
+                yield batch_labels, batch_loss, batch_predictions
         except tf.errors.OutOfRangeError:
             pass
 
@@ -53,22 +55,33 @@ class BaseModel(object):
         try:
             sess.run([data_init_op])
             while True:
-                batch_prediction = sess.run(
+                batch_predictions = sess.run(
                     [self.op_logits, self.op_prediction], feed_dict)
                 # In the event of large dataset, we may want to write prediction
                 # to save memory
-                yield batch_prediction
+                yield batch_predictions
         except tf.errors.OutOfRangeError:
             pass
 
-    def evaluate(self, data, labels, sess=None):
-        c_labels, c_predictions, c_loss = [], [], []
-        for batch_labels, batch_loss, batch_prediction in self.predict_with_labels(data, labels, sess):
-            c_labels.extend(batch_labels)
-            c_predictions.extend(batch_prediction)
-            c_loss.extend(batch_loss)
+    def evaluate(self, data, labels, total, sess=None):
 
-        ncorrects = sum(predictions == labels)
+        # collected labels, prediction, loss
+        c_labels, c_predictions = np.empty(total, dtype=int), np.empty(total, dtype=int)
+        loss = 0.0
+        begin = 0
+        end = 0
+        for batch_labels, batch_loss, batch_predictions \
+            in self.predict_with_labels(data, labels, sess):
+            # batch size
+            end += len(batch_labels)
+            # collecting
+            c_labels[begin:end] = batch_labels[:]
+            c_predictions[begin:end] = batch_predictions[:]
+            loss += batch_loss
+            begin = end
+        accuracy = 100 * sklearn.metrics.accuracy_score(c_labels, c_predictions)
+        f1 = 100 * sklearn.metrics.f1_score(c_labels, c_predictions, average='weighted')
+        return accuracy, f1, loss / total
 
     def inference(self, data, dropout):
         """
@@ -77,7 +90,8 @@ class BaseModel(object):
         logits = self._inference(data, dropout)
         return logits
 
-    def fit(self, training_data, training_labels, val_data, val_labels, progress_per=100, total=None):
+    def fit(self, training_data, training_labels, val_data, val_labels,
+            train_total, val_total, batch_size, progress_per=100, eval_every=None):
         """
         Runs the entire epoch of the train_dataset
         training_data:
@@ -91,31 +105,42 @@ class BaseModel(object):
         sess.run(self.op_init)
         training_data_init_op = self.data_iterator.make_initializer(training_data)
         training_labels_init_op = self.labels_iterator.make_initializer(training_labels)
-        # val_data_init_op = self.data_iterator.make_initailizer(val_data)
-        # val_labels_init_op = self.labels_iterator.make_initializer(val_labels)
-
         sess.run([training_data_init_op, training_labels_init_op])
-        # try:
-        #     pbar = tqdm(total=total, mininterval=1)
-        #     while True:
-        #         feed_dict = {self.ph_dropout: self.dropout}
-        #         # The only guarantee tensorflow makes about order of execution is that
-        #         # all dependencies (either data or control) of an op are executed
-        #         # before that op gets executed.
-        #         global_step, loss, loss_average, train_op = \
-        #             sess.run([self.global_step, self.op_loss, self.op_loss_average, self.op_train], feed_dict)
-        #         pbar.update()
-        #         pbar.set_postfix(trn_loss="{:.3e}".format(loss),
-        #                          trn_loss_aver="{:.3e}".format(loss_average),
-        #                          refresh=False)
-        #         # if total:
-        #         #     tf.logging.log_every_n(tf.logging.INFO, 'step: %d', progress_per, global_step)
-        #         # tf.logging.log_every_n(tf.logging.INFO, 'loss: %f, average loss: %f',
-        #         #                        progress_per, loss, loss_average)
 
-        # except tf.errors.OutOfRangeError:
-        #     pbar.close()
-        self.evaluate(val_data, val_labels, sess)
+        val_accuracy, val_loss = -float('inf'), float('inf')
+        try:
+            pbar = tqdm(total=train_total/batch_size, mininterval=1)
+            while True:
+                feed_dict = {self.ph_dropout: self.dropout}
+                # The only guarantee tensorflow makes about order of execution is that
+                # all dependencies (either data or control) of an op are executed
+                # before that op gets executed.
+                global_step, loss, loss_average, train_op = \
+                    sess.run([self.global_step, self.op_loss, self.op_loss_average, self.op_train], feed_dict)
+                pbar.update()
+                if eval_every is not None and self.n % eval_every:
+                    val_accuracy, val_f1, val_loss = \
+                        self.evaluate(val_data, val_labels, val_total, sess)
+
+                pbar.set_postfix(trn_loss="{:.3e}".format(loss),
+                                 trn_loss_aver="{:.3e}".format(loss_average),
+                                 val_accuracy="{:.3e}".format(val_accuracy),
+                                 val_loss="{:.3e}".format(val_loss),
+                                 refresh=False)
+                tf.logging.log_every_n(tf.logging.INFO,
+                                       'step: %d, trn_loss: %.3e, val_accuracy: %.3e, val_loss: %.3e',
+                                       progress_per, global_step, loss, val_accuracy, val_loss)
+                # if total:
+                #     tf.logging.log_every_n(tf.logging.INFO, 'step: %d', progress_per, global_step)
+                # tf.logging.log_every_n(tf.logging.INFO, 'loss: %f, average loss: %f',
+                #                        progress_per, loss, loss_average)
+
+        except tf.errors.OutOfRangeError:
+            pbar.close()
+        val_accuracy, _, val_loss = self.evaluate(val_data, val_labels, val_total, sess)
+        tf.logging.log(tf.logging.INFO,
+                       'step: %d, trn_loss: %.3e, val_accuracy: %.3e, val_loss: %.3e',
+                       global_step, loss, val_accuracy, val_loss)
 
     def training(self, loss, learning_rate, decay_steps=None, decay_rate=None, momentum=None):
         with tf.name_scope('training'):
@@ -143,8 +168,8 @@ class BaseModel(object):
         with tf.name_scope('loss'):
             with tf.name_scope('cross_entropy'):
                 labels = tf.to_int64(labels)
-                # cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels)
-                cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels)
+                cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels)
+                # cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels)
                 cross_entropy = tf.reduce_mean(cross_entropy)
 
             with tf.name_scope('regularization'):
