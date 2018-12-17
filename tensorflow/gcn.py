@@ -100,7 +100,9 @@ class BaseModel(object):
         val_labels:
         progress_per:
         """
-        sess = tf.Session(graph=self.graph)
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(graph=self.graph, config=config)
         # some model saving here
         sess.run(self.op_init)
         training_data_init_op = self.data_iterator.make_initializer(training_data)
@@ -122,8 +124,7 @@ class BaseModel(object):
                     val_accuracy, val_f1, val_loss = \
                         self.evaluate(val_data, val_labels, val_total, sess)
 
-                pbar.set_postfix(trn_loss="{:.3e}".format(loss),
-                                 trn_loss_aver="{:.3e}".format(loss_average),
+                pbar.set_postfix(trn_loss="{:.3e}".format(loss_average),
                                  val_accuracy="{:.3e}".format(val_accuracy),
                                  val_loss="{:.3e}".format(val_loss),
                                  refresh=False)

@@ -49,7 +49,15 @@ class CNN(BaseModel):
 
             x_2d = tf.reshape(x, [-1, self._K, self._K, self._C])
             y_2d = tf.nn.conv2d(x_2d, W, strides=[1, 1, 1, 1], padding='SAME') + b
-            y_2d = tf.layers(tf.nn.relu(y_2d), dropout)
+            # y_2d = tf.nn.relu(y_2d)
+            y_2d = tf.layers.dropout(tf.nn.relu(y_2d), dropout)
+
+        # with tf.variable_scope('conv2'):
+        #     W = self._weight_variable([self._K, self._K, self._F, self._F])
+        #     b = self._bias_variable([self._F])
+
+        #     y_2d = tf.nn.conv2d(y_2d, W, strides=[1, 1, 1, 1], padding='SAME') + b
+        #     y_2d = tf.layers.dropout(tf.nn.relu(y_2d), dropout)
 
         with tf.variable_scope('fc1'):
             y = tf.reshape(y_2d, [-1, self._K * self._K * self._F])
@@ -59,11 +67,11 @@ class CNN(BaseModel):
 
         return y
 
-cnn = CNN(28, 1, 2, 10)
+cnn = CNN(28, 1, 20, 10)
 batch_size = 200
-epochs = 2
-train_data = train_data.batch(batch_size).prefetch(6).repeat(epochs)
-train_labels = train_labels.batch(batch_size).prefetch(6).repeat(epochs)
+epochs = 10
+train_data = train_data.repeat(epochs).batch(batch_size).prefetch(6)
+train_labels = train_labels.repeat(epochs).batch(batch_size).prefetch(6)
 val_data = val_data.batch(batch_size).prefetch(6)
 val_labels = val_labels.batch(batch_size).prefetch(6)
 data_format = (train_data.output_types, train_data.output_shapes)
