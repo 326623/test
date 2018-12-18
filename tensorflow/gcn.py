@@ -128,9 +128,9 @@ class BaseModel(object):
                                  val_accuracy="{:.3e}".format(val_accuracy),
                                  val_loss="{:.3e}".format(val_loss),
                                  refresh=False)
-                tf.logging.log_every_n(tf.logging.INFO,
-                                       'step: %d, trn_loss: %.3e, val_accuracy: %.3e, val_loss: %.3e',
-                                       progress_per, global_step, loss, val_accuracy, val_loss)
+                # tf.logging.log_every_n(tf.logging.INFO,
+                #                        'step: %d, trn_loss: %.3e, val_accuracy: %.3e, val_loss: %.3e',
+                #                        progress_per, global_step, loss, val_accuracy, val_loss)
                 # if total:
                 #     tf.logging.log_every_n(tf.logging.INFO, 'step: %d', progress_per, global_step)
                 # tf.logging.log_every_n(tf.logging.INFO, 'loss: %f, average loss: %f',
