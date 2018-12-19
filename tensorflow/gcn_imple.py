@@ -125,15 +125,13 @@ class GCNN(BaseModel):
             # T: V x V, x: N x V x Fin, output: N x V x Fin
             # x_filtered.append(tf.map_fn(lambda x: tf.sparse_tensor_dense_matmul(T, x), x))
 
-        print(len(x_filtered))
-        print((x_filtered[0]))
         # K x N x V x Fin
-        x = tf.stack(x_filtered)
+        # x = tf.stack(x_filtered)
         # x = tf.parallel_stack(x_filtered)
-        # K x V x Fin*N -> K x V x Fin x N
+
+        # K x V x Fin*N -> K x V x Fin x N -> N x V x Fin x K
         x = tf.stack(x_filtered)
         x = tf.reshape(x, [K, V, Fin, -1])
-        # K x V x Fin x N -> N x V x Fin x K
         x = tf.transpose(x, perm=[3, 1, 2, 0])
 
         # K x N x V x Fin -> N x V x Fin x K
@@ -164,11 +162,13 @@ class GCNN(BaseModel):
             y = self.fc(x, self.NCls, relu=False)
         return y
 
-gcnn = GCNN(L, 20, 2, 10)
+gcnn = GCNN(L, 10, 2, 10)
 batch_size = 100
 epochs = 10
 prefetch_size = 20
 
+train_data_copy = train_data.map(lambda x: tf.expand_dims(x, 1)).batch(batch_size).prefetch(prefetch_size)
+train_labels_copy = train_labels.batch(batch_size).prefetch(prefetch_size)
 train_data = train_data.map(lambda x: tf.expand_dims(x, 1)).repeat(epochs).batch(batch_size).prefetch(prefetch_size)
 train_labels = train_labels.repeat(epochs).batch(batch_size).prefetch(prefetch_size)
 val_data = val_data.map(lambda x: tf.expand_dims(x, 1)).batch(batch_size).prefetch(prefetch_size)
@@ -184,3 +184,4 @@ sess = gcnn.fit(train_data, train_labels,
                 train_total=55000*epochs, val_total=5000,
                 batch_size=batch_size)
 print(gcnn.evaluate(test_data, test_labels, total=10000, sess=sess))
+print(gcnn.evaluate(train_data_copy, train_labels_copy, total=55000, sess=sess))
