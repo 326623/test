@@ -61,7 +61,7 @@ class BaseModel(object):
                 # to save memory
                 yield batch_predictions
         except tf.errors.OutOfRangeError:
-            pass
+            return
 
     def evaluate(self, data, labels, total, sess=None):
 
@@ -91,7 +91,8 @@ class BaseModel(object):
         return logits
 
     def fit(self, training_data, training_labels, val_data, val_labels,
-            train_total, val_total, batch_size, progress_per=100, eval_every=None):
+            train_total, val_total, batch_size, num_epochs,
+            progress_per=100, eval_every_n_epochs=None):
         """
         Runs the entire epoch of the train_dataset
         training_data:
@@ -110,48 +111,68 @@ class BaseModel(object):
         sess.run([training_data_init_op, training_labels_init_op])
 
         val_accuracy, val_loss = -float('inf'), float('inf')
-        try:
-            pbar = tqdm(total=train_total/batch_size, mininterval=1)
-            while True:
-                feed_dict = {self.ph_dropout: self.dropout}
-                # The only guarantee tensorflow makes about order of execution is that
-                # all dependencies (either data or control) of an op are executed
-                # before that op gets executed.
-                global_step, loss, loss_average, train_op = \
-                    sess.run([self.global_step, self.op_loss, self.op_loss_average, self.op_train], feed_dict)
-                pbar.update()
-                if eval_every is not None and self.n % eval_every:
-                    val_accuracy, val_f1, val_loss = \
-                        self.evaluate(val_data, val_labels, val_total, sess)
+        pbar = tqdm(total=train_total*num_epochs/batch_size, mininterval=1)
+        for n_epochs in range(num_epochs):
+            sess.run([training_data_init_op, training_labels_init_op])
+            try:
+                while True:
+                    feed_dict = {self.ph_dropout: self.dropout}
+                    # The only guarantee tensorflow makes about order of execution is that
+                    # all dependencies (either data or control) of an op are executed
+                    # before that op gets executed.
+                    global_step, loss, loss_average, train_op = \
+                        sess.run([self.global_step, self.op_loss, self.op_loss_average, self.op_train], feed_dict)
+                    pbar.update()
+                    pbar.set_postfix(trn_loss="{:.3e}".format(loss_average),
+                                     val_accuracy="{:3.3f}".format(val_accuracy),
+                                     val_loss="{:.3e}".format(val_loss),
+                                     refresh=False)
+                    # tf.logging.log_every_n(tf.logging.INFO,
+                    #                        'step: %d, trn_loss: %.3e, val_accuracy: %.3e, val_loss: %.3e',
+                    #                        progress_per, global_step, loss, val_accuracy, val_loss)
+                    # if total:
+                    #     tf.logging.log_every_n(tf.logging.INFO, 'step: %d', progress_per, global_step)
+                    # tf.logging.log_every_n(tf.logging.INFO, 'loss: %f, average loss: %f',
+                    #                        progress_per, loss, loss_average)
 
-                pbar.set_postfix(trn_loss="{:.3e}".format(loss_average),
-                                 val_accuracy="{:.3e}".format(val_accuracy),
-                                 val_loss="{:.3e}".format(val_loss),
-                                 refresh=False)
-                # tf.logging.log_every_n(tf.logging.INFO,
-                #                        'step: %d, trn_loss: %.3e, val_accuracy: %.3e, val_loss: %.3e',
-                #                        progress_per, global_step, loss, val_accuracy, val_loss)
-                # if total:
-                #     tf.logging.log_every_n(tf.logging.INFO, 'step: %d', progress_per, global_step)
-                # tf.logging.log_every_n(tf.logging.INFO, 'loss: %f, average loss: %f',
-                #                        progress_per, loss, loss_average)
+            except tf.errors.OutOfRangeError:
+                pass
 
-        except tf.errors.OutOfRangeError:
-            pbar.close()
-        val_accuracy, _, val_loss = self.evaluate(val_data, val_labels, val_total, sess)
-        tf.logging.log(tf.logging.INFO,
-                       'step: %d, trn_loss: %.3e, val_accuracy: %.3e, val_loss: %.3e',
-                       global_step, loss, val_accuracy, val_loss)
+            if eval_every_n_epochs is not None and \
+               n_epochs % eval_every_n_epochs == 0 \
+               and n_epochs != num_epochs-1: # not the last epochs, since at the end already validated
+                val_accuracy, val_f1, val_loss = \
+                    self.evaluate(val_data, val_labels, val_total, sess)
+
+        # evaluation at the end
+        self.evaluate(val_data, val_labels, val_total, sess)
+        tf.logging.info('val_accuracy: %f, val_f1: %f, val_loss: %f',
+                            val_accuracy, val_f1, val_loss)
+        pbar.close()
         return sess
 
-    def training(self, loss, learning_rate, decay_steps=None, decay_rate=None, momentum=None):
+    def training(self, loss, learning_rate, decay_steps=55000/200, decay_rate=0.95, momentum=0.9):
         with tf.name_scope('training'):
             # learning rate
             self.global_step = tf.Variable(0, name='global_step', trainable=False)
-            optimizer = tf.train.AdamOptimizer(learning_rate)
+            if decay_rate != 1:
+                learning_rate = tf.train.exponential_decay(
+                    learning_rate, self.global_step, decay_steps, decay_rate, staircase=True)
+            tf.summary.scalar('learning_rate', learning_rate)
+            if momentum == 0:
+                optimizer = tf.train.AdamOptimizer(learning_rate)
+            else:
+                optimizer = tf.train.MomentumOptimizer(learning_rate, momentum)
             grads = optimizer.compute_gradients(loss)
-            train_op = optimizer.apply_gradients(grads, self.global_step)
-            return train_op
+            op_gradients = optimizer.apply_gradients(grads, self.global_step)
+            for grad, var in grads:
+                if grad is None:
+                    print('warning: {} has no gradient'.format(var.op.name))
+                else:
+                    tf.summary.histogram(var.op.name + '/gradients', grad)
+            with tf.control_dependencies([op_gradients]):
+                op_train = tf.identity(learning_rate, name='control')
+            return op_train
 
     def probabilties(self, logits):
         """
@@ -190,12 +211,16 @@ class BaseModel(object):
             return loss, loss_average
 
     #def input_pipeline(self, data_format, labels_format):
-    def build_graph(self, data_format, labels_format, graph=None):
+    def build_graph(self, data_format, labels_format,
+                    decay_steps, decay_rate, momentum, graph=None):
         """
         data_format, labels_format: output_types, output_shapes of data_dataset, labels_dataset
         distinguish data and labels because some operations don't depend on labels, e.g.,
         predict, inference etc.
         """
+        self.decay_steps = decay_steps
+        self.decay_rate = decay_rate
+        self.momentum = momentum
         if graph:
             self.graph = graph
         else:

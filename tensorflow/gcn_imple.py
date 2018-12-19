@@ -83,11 +83,11 @@ class GCNN(BaseModel):
         self.F = F
         self.K = K
         self.NCls = num_classes
-        self.learning_rate = 0.0001
-        self.dropout = 0.5
-        self.regularization = 0.001
+        self.learning_rate = 0.02
+        self.dropout = 1
+        self.regularization = 5e-4
 
-    def chebyshev(self, x, L, Fout, K):
+    def chebyshev_p(self, x, L, Fout, K):
         # Fout: num of output features
         # N: number of signal, batch size
         # V: number of vertices, graph size
@@ -108,6 +108,7 @@ class GCNN(BaseModel):
         def convert2Sparse(L):
             L = L.tocoo()
             indices = np.column_stack((L.row, L.col))
+            print(len(indices))
             L = tf.SparseTensor(indices, L.data, L.shape)
             return tf.sparse_reorder(L)
         chebyshev_Ls = map(lambda L: convert2Sparse(L), chebyshev_Ls)
@@ -142,6 +143,85 @@ class GCNN(BaseModel):
         x = tf.nn.relu(x)
         return tf.reshape(x, [-1, V, Fout])
 
+    def chebyshev(self, x, L, Fout, K):
+        # Fout: num of output features
+        # N: number of signal, batch size
+        # V: number of vertices, graph size
+        # Fin: number of features per signal
+        N, V, Fin = x.get_shape()
+        L = scipy.sparse.csr_matrix(L)
+        # convert to a list of chebyshev matrix
+        L = graph.rescale_L(L, lmax=2)
+
+        # convert to sparseTensor
+        def convert2Sparse(L):
+            L = L.tocoo()
+            indices = np.column_stack((L.row, L.col))
+            print(len(indices))
+            L = tf.SparseTensor(indices, L.data, L.shape)
+            return tf.sparse_reorder(L)
+        L = convert2Sparse(L)
+
+        # chebyshev filtering
+        # N x V x Fin -> V x Fin x N -> V x Fin*N
+        x = tf.transpose(x, perm=[1, 2, 0])
+        x = tf.reshape(x, [V, -1])
+        x0 = x
+        x = tf.expand_dims(x, 0)
+
+        def concat(x, x_):
+            x_ = tf.expand_dims(x_, 0)  # 1 x V x Fin*N
+            return tf.concat([x, x_], axis=0) # K x V x Fin*N
+
+        if K > 1:
+            x1 = tf.sparse_tensor_dense_matmul(L, x0)
+            x = concat(x, x1)
+
+        for k in range(2, K):
+            x2 = 2 * tf.sparse_tensor_dense_matmul(L, x1) - x0
+            x = concat(x, x2)
+            x0, x1 = x1, x2
+
+        # K x V x Fin*N -> K x V x Fin x N -> N x V x Fin x K -> N*V x Fin*K
+        x = tf.reshape(x, [K, V, Fin, -1])
+        x = tf.transpose(x, perm=[3, 1, 2, 0])
+        x = tf.reshape(x, [-1, Fin*K])
+
+        W = self._weight_variable([Fin*K, Fout], regularization=False)
+        x = tf.matmul(x, W) # N*V x Fout
+        return tf.reshape(x, [-1, V, Fout])
+
+    def chebyshev5(self, x, L, Fout, K):
+        N, M, Fin = x.get_shape()
+        # Rescale Laplacian and store as a TF sparse tensor. Copy to not modify the shared L.
+        L = scipy.sparse.csr_matrix(L)
+        L = graph.rescale_L(L, lmax=2)
+        L = L.tocoo()
+        indices = np.column_stack((L.row, L.col))
+        L = tf.SparseTensor(indices, L.data, L.shape)
+        L = tf.sparse_reorder(L)
+        # Transform to Chebyshev basis
+        x0 = tf.transpose(x, perm=[1, 2, 0])  # M x Fin x N
+        x0 = tf.reshape(x0, [M, -1])  # M x Fin*N
+        x = tf.expand_dims(x0, 0)  # 1 x M x Fin*N
+        def concat(x, x_):
+            x_ = tf.expand_dims(x_, 0)  # 1 x M x Fin*N
+            return tf.concat([x, x_], axis=0)  # K x M x Fin*N
+        if K > 1:
+            x1 = tf.sparse_tensor_dense_matmul(L, x0)
+            x = concat(x, x1)
+        for k in range(2, K):
+            x2 = 2 * tf.sparse_tensor_dense_matmul(L, x1) - x0  # M x Fin*N
+            x = concat(x, x2)
+            x0, x1 = x1, x2
+        x = tf.reshape(x, [K, M, Fin, -1])  # K x M x Fin x N
+        x = tf.transpose(x, perm=[3,1,2,0])  # N x M x Fin x K
+        x = tf.reshape(x, [-1, Fin*K])  # N*M x Fin*K
+        # Filter: Fin*Fout filters of order K, i.e. one filterbank per feature pair.
+        W = self._weight_variable([Fin*K, Fout], regularization=False)
+        x = tf.matmul(x, W)  # N*M x Fout
+        return tf.reshape(x, [-1, M, Fout])  # N x M x Fout
+
     def fc(self, x, Mout, relu=True):
         N, Min = x.get_shape()
         W = self._weight_variable([int(Min), Mout], regularization=True)
@@ -155,22 +235,26 @@ class GCNN(BaseModel):
         K = self.K # support size of filter
         with tf.variable_scope('gconv1'):
             x = self.chebyshev(x, L, Fout, K)
-            x = tf.nn.dropout(x, dropout)
+            x = tf.nn.relu(x)
 
-        with tf.variable_scope('logits1'):
+        # with tf.variable_scope('gconv2'):
+        #     x = self.chebyshev(x, L, Fout, K)
+        #     x = tf.nn.dropout(x, dropout)
+
+        with tf.variable_scope('logits'):
             x = tf.reshape(x, [-1, V * Fout])
             y = self.fc(x, self.NCls, relu=False)
         return y
 
-gcnn = GCNN(L, 10, 2, 10)
-batch_size = 100
-epochs = 10
+gcnn = GCNN(L, 10, 10, 10)
+batch_size = 200
+epochs = 20
 prefetch_size = 20
 
 train_data_copy = train_data.map(lambda x: tf.expand_dims(x, 1)).batch(batch_size).prefetch(prefetch_size)
 train_labels_copy = train_labels.batch(batch_size).prefetch(prefetch_size)
-train_data = train_data.map(lambda x: tf.expand_dims(x, 1)).repeat(epochs).batch(batch_size).prefetch(prefetch_size)
-train_labels = train_labels.repeat(epochs).batch(batch_size).prefetch(prefetch_size)
+train_data = train_data.map(lambda x: tf.expand_dims(x, 1)).batch(batch_size).prefetch(prefetch_size)
+train_labels = train_labels.batch(batch_size).prefetch(prefetch_size)
 val_data = val_data.map(lambda x: tf.expand_dims(x, 1)).batch(batch_size).prefetch(prefetch_size)
 val_labels = val_labels.batch(batch_size).prefetch(prefetch_size)
 test_data = test_data.map(lambda x: tf.expand_dims(x, 1)).batch(batch_size).prefetch(prefetch_size)
@@ -178,10 +262,9 @@ test_labels = test_labels.batch(batch_size).prefetch(prefetch_size)
 
 data_format = (train_data.output_types, train_data.output_shapes)
 labels_format = (train_labels.output_types, train_labels.output_shapes)
-gcnn.build_graph(data_format, labels_format, tf.get_default_graph())
-sess = gcnn.fit(train_data, train_labels,
-                val_data, val_labels,
-                train_total=55000*epochs, val_total=5000,
-                batch_size=batch_size)
+gcnn.build_graph(data_format, labels_format, 55000/batch_size, 0.95, 1, tf.get_default_graph())
+sess = gcnn.fit(train_data, train_labels, val_data, val_labels,
+                train_total=55000, val_total=5000, batch_size=batch_size,
+                num_epochs=epochs, progress_per=100, eval_every_n_epochs=1)
 print(gcnn.evaluate(test_data, test_labels, total=10000, sess=sess))
 print(gcnn.evaluate(train_data_copy, train_labels_copy, total=55000, sess=sess))
