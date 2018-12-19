@@ -142,6 +142,7 @@ class BaseModel(object):
         tf.logging.log(tf.logging.INFO,
                        'step: %d, trn_loss: %.3e, val_accuracy: %.3e, val_loss: %.3e',
                        global_step, loss, val_accuracy, val_loss)
+        return sess
 
     def training(self, loss, learning_rate, decay_steps=None, decay_rate=None, momentum=None):
         with tf.name_scope('training'):
