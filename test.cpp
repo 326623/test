@@ -608,36 +608,80 @@
 //     t.join();
 //   }
 // }
-#include <thread>
-#include <atomic>
-#include <cassert>
-#include <vector>
+// #include <thread>
+// #include <atomic>
+// #include <cassert>
+// #include <vector>
 
-std::vector<int> data;
-std::atomic<int> flag = {0};
+// std::vector<int> data;
+// std::atomic<int> flag = {0};
 
-void thread_1() {
-  data.push_back(42);
-  flag.store(1, std::memory_order_relaxed);
-}
+// void thread_1() {
+//   data.push_back(42);
+//   flag.store(1, std::memory_order_relaxed);
+// }
 
-void thread_2() {
-  int expected=1;
-  while (!flag.compare_exchange_strong(expected, 2, std::memory_order_relaxed)) {
-    expected = 1;
+// void thread_2() {
+//   int expected=1;
+//   while (!flag.compare_exchange_strong(expected, 2, std::memory_order_relaxed)) {
+//     expected = 1;
+//   }
+// }
+
+// void thread_3() {
+//   while (flag.load(std::memory_order_relaxed) < 2) ;
+//   assert(data.at(0) = 42);
+// }
+
+// int main() {
+//   std::thread c(thread_3);
+//   std::thread b(thread_2);
+//   //std::thread a(thread_1);
+//   c.join();
+//   b.join();
+//   //a.join();
+// }
+
+template <typename Iterator>
+Iterator find_max1(Iterator first, Iterator last) {
+  if (first == last) return last;
+  auto maxIter = first++;
+  for (; first != last; ++first) {
+    if (*maxIter < *first)
+      maxIter = first;
   }
+  return maxIter;
 }
 
-void thread_3() {
-  while (flag.load(std::memory_order_relaxed) < 2) ;
-  assert(data.at(0) = 42);
+template <typename Iterator>
+Iterator find_max2(Iterator first, Iterator last) {
+  if (first == last) return last;
+
+  auto max = *first;
+  auto maxIter = first++;
+  for (; first != last; ++first) {
+    if (max < *first) {
+      max = *first;
+      maxIter = first;
+    }
+  }
+
+  return maxIter;
 }
 
-int main() {
-  std::thread c(thread_3);
-  std::thread b(thread_2);
-  //std::thread a(thread_1);
-  c.join();
-  b.join();
-  //a.join();
-}
+// template <typename Iterator>
+// Iterator find_max3(Iterator first, Iterator last) {
+
+// }
+
+// static inline Vc::float_v fu(Vc::float_v::AsArg x) {
+//   #ifdef USE_SCALAR_SINCOS
+//   Vc::float_v r;
+//   for (size_t i = 0; i < Vc:float_v::Size; ++ i) {
+//     r[i] = std::sin(x[i]);
+//   }
+//   return r;
+//   #else
+//   return Vc::sin(x);
+//   #endif
+// }
