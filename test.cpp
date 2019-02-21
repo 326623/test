@@ -685,3 +685,25 @@ Iterator find_max2(Iterator first, Iterator last) {
 //   return Vc::sin(x);
 //   #endif
 // }
+#include <vector>
+#include <algorithm>
+#include <iostream>
+
+class StateID {
+  int var;
+public:
+  static const StateID no_state;
+  StateID() {}
+  StateID(int var) : var(var) {}
+  int get_var() const { return var; }
+  bool operator== (const StateID& other) const
+  { return this->var == other.var; }
+};
+
+const StateID StateID::no_state = StateID(-1);
+
+int main() {
+  StateID id = StateID::no_state;
+  std::cout << id.get_var() << '\n';
+  return (id == StateID::no_state);
+}
