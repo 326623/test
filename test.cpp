@@ -325,7 +325,7 @@
 //     solver.Solve();
 //     // the value of each variable in the solution.
 //     printf("\nSolution:");
-//     printf("\nx = %.1f", x->solution_value());
+p//     printf("\nx = %.1f", x->solution_value());
 //     printf("\ny = %.1f", y->solution_value());
 
 //     // The objective value of the solution.
@@ -642,32 +642,32 @@
 //   //a.join();
 // }
 
-template <typename Iterator>
-Iterator find_max1(Iterator first, Iterator last) {
-  if (first == last) return last;
-  auto maxIter = first++;
-  for (; first != last; ++first) {
-    if (*maxIter < *first)
-      maxIter = first;
-  }
-  return maxIter;
-}
+// template <typename Iterator>
+// Iterator find_max1(Iterator first, Iterator last) {
+//   if (first == last) return last;
+//   auto maxIter = first++;
+//   for (; first != last; ++first) {
+//     if (*maxIter < *first)
+//       maxIter = first;
+//   }
+//   return maxIter;
+// }
 
-template <typename Iterator>
-Iterator find_max2(Iterator first, Iterator last) {
-  if (first == last) return last;
+// template <typename Iterator>
+// Iterator find_max2(Iterator first, Iterator last) {
+//   if (first == last) return last;
 
-  auto max = *first;
-  auto maxIter = first++;
-  for (; first != last; ++first) {
-    if (max < *first) {
-      max = *first;
-      maxIter = first;
-    }
-  }
+//   auto max = *first;
+//   auto maxIter = first++;
+//   for (; first != last; ++first) {
+//     if (max < *first) {
+//       max = *first;
+//       maxIter = first;
+//     }
+//   }
 
-  return maxIter;
-}
+//   return maxIter;
+// }
 
 // template <typename Iterator>
 // Iterator find_max3(Iterator first, Iterator last) {
@@ -685,25 +685,54 @@ Iterator find_max2(Iterator first, Iterator last) {
 //   return Vc::sin(x);
 //   #endif
 // }
+// #include <vector>
+// #include <algorithm>
+// #include <iostream>
+
+// class StateID {
+//   int var;
+// public:
+//   static const StateID no_state;
+//   StateID() {}
+//   StateID(int var) : var(var) {}
+//   int get_var() const { return var; }
+//   bool operator== (const StateID& other) const
+//   { return this->var == other.var; }
+// };
+
+// const StateID StateID::no_state = StateID(-1);
+
+// int main() {
+//   StateID id = StateID::no_state;
+//   std::cout << id.get_var() << '\n';
+//   return (id == StateID::no_state);
+// }
+
+#include <benchmark/benchmark.h>
 #include <vector>
-#include <algorithm>
-#include <iostream>
 
-class StateID {
-  int var;
-public:
-  static const StateID no_state;
-  StateID() {}
-  StateID(int var) : var(var) {}
-  int get_var() const { return var; }
-  bool operator== (const StateID& other) const
-  { return this->var == other.var; }
-};
-
-const StateID StateID::no_state = StateID(-1);
-
-int main() {
-  StateID id = StateID::no_state;
-  std::cout << id.get_var() << '\n';
-  return (id == StateID::no_state);
+static void bench_create(benchmark::State& state) {
+  while (state.KeepRunning()) {
+    std::vector<int> v;
+    (void) v;
+  }
 }
+BENCHMARK(bench_create);
+
+static void bench_reserve(benchmark::State& state) {
+  while (state.KeepRunning()) {
+    std::vetor<int> v;
+    v.reverse(1);
+    (void)v;
+  }
+}
+BENCHMARK(bench_reserve);
+
+static void bench_push_back(benchmark::State& state) {
+  while (state.KeepRunning()) {
+    std::vector<int> v;
+    v.reverse(1);
+    v.push_back(42);
+  }
+}
+BENCHMARK(bench_push_back);
