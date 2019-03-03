@@ -1,0 +1,11 @@
+-O3
+-std=c++11
+-stdlib=libc++
+-lc++abi
+-Wl
+-fno-exceptions
+-fno-rtti
+-Wall
+-pedantic
+-Werror
+-pthreads

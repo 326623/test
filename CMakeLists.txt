@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5.1)
 if(MSVC)
   add_compile_options(/W3 /WX)
 else()
-  add_compile_options(-W -Wall -Werror)
+  add_compile_options(-W -Wall -Werror -fno-omit-frame-pointer)
   #add_compile_options(-W -Wall)
 endif()
 

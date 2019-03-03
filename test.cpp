@@ -177,13 +177,13 @@
 //     std::cout << str << ' ';
 //   std::cout << '\n';
 // }
-#include <fstream>
-#include <iostream>
-#include <atomic>
-#include <regex>
-#include <unordered_map>
-#include <benchmark/benchmark.h>
-#include <Vc/Vc>
+// #include <fstream>
+// #include <iostream>
+// #include <atomic>
+// #include <regex>
+// #include <unordered_map>
+// #include <benchmark/benchmark.h>
+// #include <Vc/Vc>
 
 // Int main() {
 //   // std::regex re("[a-zA-Z]+|[0-9]+");
@@ -325,7 +325,7 @@
 //     solver.Solve();
 //     // the value of each variable in the solution.
 //     printf("\nSolution:");
-p//     printf("\nx = %.1f", x->solution_value());
+//     printf("\nx = %.1f", x->solution_value());
 //     printf("\ny = %.1f", y->solution_value());
 
 //     // The objective value of the solution.
@@ -439,11 +439,11 @@ p//     printf("\nx = %.1f", x->solution_value());
 //   return 0;
 // }
 
-#include <iostream>
-#include <sstream>
-#include <cassert>
-#include <ortools/base/logging.h>
-#include <Eigen/Dense>
+// #include <iostream>
+// #include <sstream>
+// #include <cassert>
+// #include <ortools/base/logging.h>
+// #include <Eigen/Dense>
 
 //using namespace Eigen;
 //using Eigen::MatrixXd;
@@ -710,10 +710,18 @@ p//     printf("\nx = %.1f", x->solution_value());
 
 #include <benchmark/benchmark.h>
 #include <vector>
+static void escape(void* p) {
+  asm volatile("" : : "g"(p) : "memory");
+}
+
+static void clobber() {
+  asm volatile("" : : : "memory");
+}
 
 static void bench_create(benchmark::State& state) {
   while (state.KeepRunning()) {
     std::vector<int> v;
+    escape(&v);
     (void) v;
   }
 }
@@ -721,9 +729,9 @@ BENCHMARK(bench_create);
 
 static void bench_reserve(benchmark::State& state) {
   while (state.KeepRunning()) {
-    std::vetor<int> v;
-    v.reverse(1);
-    (void)v;
+    std::vector<int> v;
+    v.reserve(1);
+    escape(v.data());
   }
 }
 BENCHMARK(bench_reserve);
@@ -731,8 +739,20 @@ BENCHMARK(bench_reserve);
 static void bench_push_back(benchmark::State& state) {
   while (state.KeepRunning()) {
     std::vector<int> v;
-    v.reverse(1);
+    v.reserve(1);
     v.push_back(42);
   }
 }
 BENCHMARK(bench_push_back);
+
+static void bench_direct_push_back(benchmark::State& state) {
+  while (state.KeepRunning()) {
+    std::vector<int> v;
+    escape(v.data());
+    v.push_back(42);
+    clobber();
+  }
+}
+BENCHMARK(bench_direct_push_back);
+
+BENCHMARK_MAIN();
