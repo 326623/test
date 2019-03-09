@@ -756,3 +756,21 @@ static void bench_direct_push_back(benchmark::State& state) {
 BENCHMARK(bench_direct_push_back);
 
 BENCHMARK_MAIN();
+
+static void divide(benchmark::State& state) {
+  // Code inside this loop is measured repeatedly
+  for (auto _ : state) {
+    int i = rand() / rand();
+  }
+}
+// Register the function as a benchmark
+BENCHMARK(divide);
+
+static void modular(benchmark::State& state) {
+  // Code before the loop is not measured
+  // std::string x = "hello";
+  for (auto _ : state) {
+    int i = rand() % rand();
+  }
+}
+BENCHMARK(modular);
