@@ -760,7 +760,7 @@ BENCHMARK_MAIN();
 static void divide(benchmark::State& state) {
   // Code inside this loop is measured repeatedly
   for (auto _ : state) {
-    int i = rand() / rand();
+    // int i = rand() / rand();
   }
 }
 // Register the function as a benchmark
@@ -770,7 +770,7 @@ static void modular(benchmark::State& state) {
   // Code before the loop is not measured
   // std::string x = "hello";
   for (auto _ : state) {
-    int i = rand() % rand();
+    // int i = rand() % rand();
   }
 }
 BENCHMARK(modular);

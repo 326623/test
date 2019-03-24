@@ -20,6 +20,9 @@ find_package( GTest REQUIRED )
 find_package( benchmark REQUIRED )
 find_package( OpenMP REQUIRED )
 
+# use -DCMAKE_MODULE_PATH to help cmake locate cmake modules (FindXXXX)
+find_package( SFML 2 REQUIRED network audio graphics window system)
+
 find_package( ortools CONFIG REQUIRED )
 
 set(CMAKE_CXX_STANDARD 11)
@@ -50,6 +53,9 @@ target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
 add_executable(hw2.out hw2.cpp)
 target_include_directories(hw2.out PRIVATE ${GTEST_INCLUDE_DIR})
 target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
+
+add_executable(draw_window.out draw_window.cpp)
+target_link_libraries(draw_window.out PRIVATE ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
 
 #enable_language(C ASM_NASM)
 #set_source_files_properties(src/avx.asm PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
