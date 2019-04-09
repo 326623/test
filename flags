@@ -9,3 +9,7 @@
 -pedantic
 -Werror
 -pthreads
+# for checking loop-vectorize
+-Rpass-analysis=loop-vectorize
+-Rpass=loop-vectorize
+-Rpass-missed=loop-vectorize 
