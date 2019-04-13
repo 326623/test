@@ -23,13 +23,13 @@ find_package( OpenMP REQUIRED )
 # use -DCMAKE_MODULE_PATH to help cmake locate cmake modules (FindXXXX)
 find_package( SFML 2 REQUIRED network audio graphics window system)
 
-find_package( ortools CONFIG REQUIRED )
+# find_package( ortools CONFIG REQUIRED )
 
 set(CMAKE_CXX_STANDARD 11)
 #add_subdirectory(abseil-cpp)
 
 add_executable ( testing.out test.cpp )
-target_link_libraries ( testing.out PRIVATE Eigen3::Eigen ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES} ortools::ortools  )
+target_link_libraries ( testing.out PRIVATE Eigen3::Eigen ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES}) # ortools::ortools  )
 target_compile_options ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} ${Vc_ALL_FLAGS} "-O3" )
 target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
 

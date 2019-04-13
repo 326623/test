@@ -710,6 +710,7 @@
 
 #include <benchmark/benchmark.h>
 #include <vector>
+#include <iostream>
 static void escape(void* p) {
   asm volatile("" : : "g"(p) : "memory");
 }
@@ -718,59 +719,84 @@ static void clobber() {
   asm volatile("" : : : "memory");
 }
 
-static void bench_create(benchmark::State& state) {
-  while (state.KeepRunning()) {
-    std::vector<int> v;
-    escape(&v);
-    (void) v;
-  }
-}
-BENCHMARK(bench_create);
+// static void bench_create(benchmark::State& state) {
+//   while (state.KeepRunning()) {
+//     std::vector<int> v;
+//     escape(&v);
+//     (void) v;
+//   }
+// }
+// // BENCHMARK(bench_create);
 
-static void bench_reserve(benchmark::State& state) {
-  while (state.KeepRunning()) {
-    std::vector<int> v;
-    v.reserve(1);
-    escape(v.data());
-  }
-}
-BENCHMARK(bench_reserve);
+// static void bench_reserve(benchmark::State& state) {
+//   while (state.KeepRunning()) {
+//     std::vector<int> v;
+//     v.reserve(1);
+//     escape(v.data());
+//   }
+// }
+// // BENCHMARK(bench_reserve);
 
-static void bench_push_back(benchmark::State& state) {
-  while (state.KeepRunning()) {
-    std::vector<int> v;
-    v.reserve(1);
-    v.push_back(42);
-  }
-}
-BENCHMARK(bench_push_back);
+// static void bench_push_back(benchmark::State& state) {
+//   while (state.KeepRunning()) {
+//     std::vector<int> v;
+//     v.reserve(1);
+//     v.push_back(42);
+//   }
+// }
+// // BENCHMARK(bench_push_back);
 
-static void bench_direct_push_back(benchmark::State& state) {
-  while (state.KeepRunning()) {
-    std::vector<int> v;
-    escape(v.data());
-    v.push_back(42);
-    clobber();
-  }
-}
-BENCHMARK(bench_direct_push_back);
+// static void bench_direct_push_back(benchmark::State& state) {
+//   while (state.KeepRunning()) {
+//     std::vector<int> v;
+//     escape(v.data());
+//     v.push_back(42);
+//     clobber();
+//   }
+// }
+// // BENCHMARK(bench_direct_push_back);
 
+// static void divide(benchmark::State& state) {
+//   // Code inside this loop is measured repeatedly
+//   for (auto _ : state) {
+//     // int i = rand() / rand();
+//   }
+// }
+// // Register the function as a benchmark
+// // BENCHMARK(divide);
+
+// static void modular(benchmark::State& state) {
+//   // Code before the loop is not measured
+//   // std::string x = "hello";
+//   for (auto _ : state) {
+//     // int i = rand() % rand();
+//   }
+// }
+// BENCHMARK(modular);
+
+static void vector_add(benchmark::State& state) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  auto num = state.range(0);
+  std::uniform_int_distribution<int> dis(1, 10000);
+  std::vector<int> a(num);
+  std::vector<int> b(num);
+  std::vector<int> c(num);
+  auto randomGenerate = [&gen, &dis] () {
+                          return dis(gen);
+                        };
+  std::generate(a.begin(), a.end(), randomGenerate);
+  std::generate(b.begin(), b.end(), randomGenerate);
+  // int sum = 0;
+  for (auto _ : state) {
+    for (std::size_t i = 0; i < a.size(); ++i) {
+      c[i] = a[i] + b[i];
+      // sum += c[i];
+    }
+  }
+  escape(&c);
+  // escape(&sum);
+  clobber();
+}
+BENCHMARK(vector_add)->RangeMultiplier(2)->Range(8, 1<<20);
 BENCHMARK_MAIN();
-
-static void divide(benchmark::State& state) {
-  // Code inside this loop is measured repeatedly
-  for (auto _ : state) {
-    // int i = rand() / rand();
-  }
-}
-// Register the function as a benchmark
-BENCHMARK(divide);
-
-static void modular(benchmark::State& state) {
-  // Code before the loop is not measured
-  // std::string x = "hello";
-  for (auto _ : state) {
-    // int i = rand() % rand();
-  }
-}
-BENCHMARK(modular);
