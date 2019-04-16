@@ -32,13 +32,19 @@ void inclusive_scan(Iterator first, Iterator last, Iterator::value_type initial,
 
 __device__
 void inclusive_prefix_sum(float* first, float* last) {
-  int n = last - first;
-  int maxJ = ceil(log(n));
+  int num = last - first;
+  int id = threadIdx.x + blockIdx.x * blockDim.x;
+  // may need to check overflow
+  int maxJ = static_cast<int>(ceil(log(static_cast<float>(n))));
   for (int j = 0; j < maxJ; ++ j) {
-    parallel for k {
-        if (k >= 2^(j-1)) {
-          x[k] = x[k - 2^(j-1)] + x[k];
-        }
+    for (int i = id; i < num; i += blockDim.x * gridDim.x) {
+      if (i >= (1 << (j-1))) {
+        first[k] = first[k - (1 << (j-1))] + first[k];
       }
+    }
   }
+}
+
+int main() {
+  cuda
 }
