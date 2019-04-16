@@ -183,7 +183,7 @@
 #include <regex>
 #include <unordered_map>
 #include <benchmark/benchmark.h>
-#include <Vc/Vc>
+// #include <Vc/Vc>
 
 // Int main() {
 //   // std::regex re("[a-zA-Z]+|[0-9]+");
@@ -442,7 +442,7 @@
 #include <iostream>
 #include <sstream>
 #include <cassert>
-#include <ortools/base/logging.h>
+// #include <ortools/base/logging.h>
 #include <Eigen/Dense>
 
 //using namespace Eigen;
@@ -685,3 +685,149 @@ Iterator find_max2(Iterator first, Iterator last) {
 //   return Vc::sin(x);
 //   #endif
 // }
+
+// class NumArray {
+//   std::vector<int> m_nums;
+// public:
+//   NumArray(vector<int> nums) {
+//     m_nums.resize(nums.size()+1);
+//     for ()
+//   }
+
+//   void update(int i, int val) {
+
+//   }
+
+//   int sumRange(int i, int j) {
+
+//   }
+// };
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * NumArray obj = new NumArray(nums);
+ * obj.update(i,val);
+ * int param_2 = obj.sumRange(i,j);
+ */
+
+static const int accelerate = []() {
+  std::ios::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+  return 0;
+}();
+
+// "aaab" "a*b"
+//     ^     ^
+// "aaa" "a*"
+//     ^   ^
+// "" "a*"
+template <typename Iterator>
+bool isMatch(Iterator first1, Iterator last1,
+             Iterator first2, Iterator last2,
+             char previous) {
+  if (first1 == last1 && first2 == last2) return true;
+  // pattern exhausted
+  if (first2 == last2) return false;
+  // text exhausted, two cases needed to explore
+  if (first1 == last1) {
+    // advance, assume no invalid regular expression
+    // pattern == "*"
+    if (*first2 == '*')
+      return isMatch(first1, last1, first2+1, last2, previous);
+
+    // the next is '*', advance
+    if (first2+1 != last2 && *(first2+1) == '*')
+      return isMatch(first1, last1, first2+2, last2, previous);
+
+    // neither of those cases
+    return false;
+  }
+  if (*first1 == *first2 || *first2 == '.')
+    return isMatch(first1+1, last1, first2+1, last2, *first2);
+
+  if (*first2 == '*' && (*first1 == previous || previous = '.'))
+    return isMatch(first1+1, last1, first2, last2, previous);
+  return false;
+}
+
+// TEST(TEST1, TEST12) {
+//   std::string a = "abc";
+//   std::string b = "abc";
+//   EXPECT_TRUE(isMatch(std::begin(a), std::end(a),
+//                       std::begin(b), std::end(b),
+//                       '!'));
+// }
+int main() {
+  std::string a = "aaaa";
+  std::string b = "a*bc";
+  bool expression = isMatch(std::begin(a), std::end(a),
+                            std::begin(b), std::end(b),
+                            '!');
+  if (expression) {
+    std::cout << "true\n";
+  }
+  else {
+    std::cout << "false\n";
+  }
+  return 0;
+}
+
+// class Solution {
+// public:
+//   void set2vec(std::set<int> &a, std::vector<int> &v) {
+//     for (auto i = a.cbegin(); i != a.cend(); ++i) {
+//       v.emplace_back(*i);
+//     }
+//   }
+
+//   vector<int> powerfulIntegers(int x, int y, int bound) {
+//     std::vector<int> vecResult;
+//     std::set<int> result;
+//     if (bound < 2) return vecResult;
+
+//     if (x == 1 && y == 1) {
+//       vecResult.emplace_back(2);
+//       return vecResult;
+//     }
+//     if (x == 1) {
+//       auto yIterations = static_cast<int>(std::log(bound) / std::log(y));
+//       for (int j = 0; j < yIterations; ++ j) {
+//         int num = 1 + std::pow(y, j);
+//         if (num <= bound) {
+//           result.emplace(num);
+//         }
+//         else break;
+//       }
+//       set2vec(result, vecResult);
+//       return vecResult;
+//     }
+//     else if (y == 1) {
+//       auto xIterations = static_cast<int>(std::log(bound) / std::log(x));
+//       for (int i = 0; i < xIterations; ++ i) {
+//         int num = 1 + std::pow(x, i);
+//         if (num <= bound) {
+//           result.emplace(num);
+//         }
+//         else break;
+//       }
+//       set2vec(result, vecResult);
+//       return vecResult;
+//     }
+//     else {
+//       // determine how many iterations for x, y's pow
+//       auto xIterations = static_cast<int>(std::log(bound) / std::log(x));
+//       auto yIterations = static_cast<int>(std::log(bound) / std::log(y));
+//       for (int i = 0; i < xIterations; ++ i) {
+//         for (int j = 0; j < yIterations; ++ j) {
+//           int num = std::pow(x, i) + std::pow(y, j);
+//           if (num <= bound) {
+//             result.emplace(num);
+//           }
+//           else break;
+//         }
+//       }
+//       set2vec(result, vecResult);
+//       return vecResult;
+//     }
+//   }
+// };
