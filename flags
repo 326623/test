@@ -1,0 +1,15 @@
+-O3
+-std=c++11
+-stdlib=libc++
+-lc++abi
+-Wl
+-fno-exceptions
+-fno-rtti
+-Wall
+-pedantic
+-Werror
+-pthreads
+# for checking loop-vectorize
+-Rpass-analysis=loop-vectorize
+-Rpass=loop-vectorize
+-Rpass-missed=loop-vectorize 

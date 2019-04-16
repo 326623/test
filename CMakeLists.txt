@@ -3,16 +3,16 @@ cmake_minimum_required(VERSION 3.5.1)
 if(MSVC)
   add_compile_options(/W3 /WX)
 else()
-  add_compile_options(-W -Wall -Werror)
+  add_compile_options(-W -Wall -Werror -fno-omit-frame-pointer)
   #add_compile_options(-W -Wall)
 endif()
 
 #list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules/tensorflow-cmake")
 
 # tensorflow dependency
-#find_package( TensorFlow REQUIRED )
-#find_package( Eigen3 REQUIRED )
-#find_package( Protobuf REQUIRED )
+# find_package( TensorFlow REQUIRED )
+find_package( Eigen3 REQUIRED )
+# find_package( Protobuf REQUIRED )
 
 find_package( Eigen3 3.3 REQUIRED NO_MODULE )
 # find_package( Vc 1.4 REQUIRED )
@@ -20,13 +20,16 @@ find_package( GTest REQUIRED )
 find_package( benchmark REQUIRED )
 find_package( OpenMP REQUIRED )
 
+# use -DCMAKE_MODULE_PATH to help cmake locate cmake modules (FindXXXX)
+find_package( SFML 2 REQUIRED network audio graphics window system)
+
 # find_package( ortools CONFIG REQUIRED )
 
 set(CMAKE_CXX_STANDARD 11)
 #add_subdirectory(abseil-cpp)
 
 add_executable ( testing.out test.cpp )
-target_link_libraries ( testing.out PRIVATE Eigen3::Eigen ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES}   )
+target_link_libraries ( testing.out PRIVATE Eigen3::Eigen ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES}) # ortools::ortools  )
 target_compile_options ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} ${Vc_ALL_FLAGS} "-O3" )
 target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
 
@@ -35,7 +38,7 @@ target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
 # message ( STATUS ${Vc_DEFINITIONS} )
 # message ( STATUS ${Vc_COMPILER_FLAGS} )
 # message ( STATUS ${Vc_ARCHITECTURE_FLAGS} )
-# message ( STATUS ${Vc_ALL_FLAGS} )
+# message ( STATUS ${Vc_ALL_FLnnAGS} )
 
 # add_executable ( testing.out test.cpp )
 # target_include_directories(testing.out PRIVATE
@@ -50,6 +53,9 @@ target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
 add_executable(hw2.out hw2.cpp)
 target_include_directories(hw2.out PRIVATE ${GTEST_INCLUDE_DIR})
 target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
+
+add_executable(draw_window.out draw_window.cpp)
+target_link_libraries(draw_window.out PRIVATE ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
 
 #enable_language(C ASM_NASM)
 #set_source_files_properties(src/avx.asm PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")

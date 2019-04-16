@@ -177,12 +177,12 @@
 //     std::cout << str << ' ';
 //   std::cout << '\n';
 // }
-#include <fstream>
-#include <iostream>
-#include <atomic>
-#include <regex>
-#include <unordered_map>
-#include <benchmark/benchmark.h>
+// #include <fstream>
+// #include <iostream>
+// #include <atomic>
+// #include <regex>
+// #include <unordered_map>
+// #include <benchmark/benchmark.h>
 // #include <Vc/Vc>
 
 // Int main() {
@@ -439,11 +439,11 @@
 //   return 0;
 // }
 
-#include <iostream>
-#include <sstream>
-#include <cassert>
+// #include <iostream>
+// #include <sstream>
+// #include <cassert>
 // #include <ortools/base/logging.h>
-#include <Eigen/Dense>
+// #include <Eigen/Dense>
 
 //using namespace Eigen;
 //using Eigen::MatrixXd;
@@ -642,32 +642,32 @@
 //   //a.join();
 // }
 
-template <typename Iterator>
-Iterator find_max1(Iterator first, Iterator last) {
-  if (first == last) return last;
-  auto maxIter = first++;
-  for (; first != last; ++first) {
-    if (*maxIter < *first)
-      maxIter = first;
-  }
-  return maxIter;
-}
+// template <typename Iterator>
+// Iterator find_max1(Iterator first, Iterator last) {
+//   if (first == last) return last;
+//   auto maxIter = first++;
+//   for (; first != last; ++first) {
+//     if (*maxIter < *first)
+//       maxIter = first;
+//   }
+//   return maxIter;
+// }
 
-template <typename Iterator>
-Iterator find_max2(Iterator first, Iterator last) {
-  if (first == last) return last;
+// template <typename Iterator>
+// Iterator find_max2(Iterator first, Iterator last) {
+//   if (first == last) return last;
 
-  auto max = *first;
-  auto maxIter = first++;
-  for (; first != last; ++first) {
-    if (max < *first) {
-      max = *first;
-      maxIter = first;
-    }
-  }
+//   auto max = *first;
+//   auto maxIter = first++;
+//   for (; first != last; ++first) {
+//     if (max < *first) {
+//       max = *first;
+//       maxIter = first;
+//     }
+//   }
 
-  return maxIter;
-}
+//   return maxIter;
+// }
 
 // template <typename Iterator>
 // Iterator find_max3(Iterator first, Iterator last) {
@@ -685,149 +685,119 @@ Iterator find_max2(Iterator first, Iterator last) {
 //   return Vc::sin(x);
 //   #endif
 // }
+// #include <vector>
+// #include <algorithm>
+// #include <iostream>
 
-// class NumArray {
-//   std::vector<int> m_nums;
+// class StateID {
+//   int var;
 // public:
-//   NumArray(vector<int> nums) {
-//     m_nums.resize(nums.size()+1);
-//     for ()
-//   }
-
-//   void update(int i, int val) {
-
-//   }
-
-//   int sumRange(int i, int j) {
-
-//   }
+//   static const StateID no_state;
+//   StateID() {}
+//   StateID(int var) : var(var) {}
+//   int get_var() const { return var; }
+//   bool operator== (const StateID& other) const
+//   { return this->var == other.var; }
 // };
 
-/**
- * Your NumArray object will be instantiated and called as such:
- * NumArray obj = new NumArray(nums);
- * obj.update(i,val);
- * int param_2 = obj.sumRange(i,j);
- */
+// const StateID StateID::no_state = StateID(-1);
 
-static const int accelerate = []() {
-  std::ios::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  return 0;
-}();
-
-// "aaab" "a*b"
-//     ^     ^
-// "aaa" "a*"
-//     ^   ^
-// "" "a*"
-template <typename Iterator>
-bool isMatch(Iterator first1, Iterator last1,
-             Iterator first2, Iterator last2,
-             char previous) {
-  if (first1 == last1 && first2 == last2) return true;
-  // pattern exhausted
-  if (first2 == last2) return false;
-  // text exhausted, two cases needed to explore
-  if (first1 == last1) {
-    // advance, assume no invalid regular expression
-    // pattern == "*"
-    if (*first2 == '*')
-      return isMatch(first1, last1, first2+1, last2, previous);
-
-    // the next is '*', advance
-    if (first2+1 != last2 && *(first2+1) == '*')
-      return isMatch(first1, last1, first2+2, last2, previous);
-
-    // neither of those cases
-    return false;
-  }
-  if (*first1 == *first2 || *first2 == '.')
-    return isMatch(first1+1, last1, first2+1, last2, *first2);
-
-  if (*first2 == '*' && (*first1 == previous || previous = '.'))
-    return isMatch(first1+1, last1, first2, last2, previous);
-  return false;
-}
-
-// TEST(TEST1, TEST12) {
-//   std::string a = "abc";
-//   std::string b = "abc";
-//   EXPECT_TRUE(isMatch(std::begin(a), std::end(a),
-//                       std::begin(b), std::end(b),
-//                       '!'));
+// int main() {
+//   StateID id = StateID::no_state;
+//   std::cout << id.get_var() << '\n';
+//   return (id == StateID::no_state);
 // }
-int main() {
-  std::string a = "aaaa";
-  std::string b = "a*bc";
-  bool expression = isMatch(std::begin(a), std::end(a),
-                            std::begin(b), std::end(b),
-                            '!');
-  if (expression) {
-    std::cout << "true\n";
-  }
-  else {
-    std::cout << "false\n";
-  }
-  return 0;
+
+#include <benchmark/benchmark.h>
+#include <vector>
+#include <iostream>
+static void escape(void* p) {
+  asm volatile("" : : "g"(p) : "memory");
 }
 
-// class Solution {
-// public:
-//   void set2vec(std::set<int> &a, std::vector<int> &v) {
-//     for (auto i = a.cbegin(); i != a.cend(); ++i) {
-//       v.emplace_back(*i);
-//     }
-//   }
+static void clobber() {
+  asm volatile("" : : : "memory");
+}
 
-//   vector<int> powerfulIntegers(int x, int y, int bound) {
-//     std::vector<int> vecResult;
-//     std::set<int> result;
-//     if (bound < 2) return vecResult;
-
-//     if (x == 1 && y == 1) {
-//       vecResult.emplace_back(2);
-//       return vecResult;
-//     }
-//     if (x == 1) {
-//       auto yIterations = static_cast<int>(std::log(bound) / std::log(y));
-//       for (int j = 0; j < yIterations; ++ j) {
-//         int num = 1 + std::pow(y, j);
-//         if (num <= bound) {
-//           result.emplace(num);
-//         }
-//         else break;
-//       }
-//       set2vec(result, vecResult);
-//       return vecResult;
-//     }
-//     else if (y == 1) {
-//       auto xIterations = static_cast<int>(std::log(bound) / std::log(x));
-//       for (int i = 0; i < xIterations; ++ i) {
-//         int num = 1 + std::pow(x, i);
-//         if (num <= bound) {
-//           result.emplace(num);
-//         }
-//         else break;
-//       }
-//       set2vec(result, vecResult);
-//       return vecResult;
-//     }
-//     else {
-//       // determine how many iterations for x, y's pow
-//       auto xIterations = static_cast<int>(std::log(bound) / std::log(x));
-//       auto yIterations = static_cast<int>(std::log(bound) / std::log(y));
-//       for (int i = 0; i < xIterations; ++ i) {
-//         for (int j = 0; j < yIterations; ++ j) {
-//           int num = std::pow(x, i) + std::pow(y, j);
-//           if (num <= bound) {
-//             result.emplace(num);
-//           }
-//           else break;
-//         }
-//       }
-//       set2vec(result, vecResult);
-//       return vecResult;
-//     }
+// static void bench_create(benchmark::State& state) {
+//   while (state.KeepRunning()) {
+//     std::vector<int> v;
+//     escape(&v);
+//     (void) v;
 //   }
-// };
+// }
+// // BENCHMARK(bench_create);
+
+// static void bench_reserve(benchmark::State& state) {
+//   while (state.KeepRunning()) {
+//     std::vector<int> v;
+//     v.reserve(1);
+//     escape(v.data());
+//   }
+// }
+// // BENCHMARK(bench_reserve);
+
+// static void bench_push_back(benchmark::State& state) {
+//   while (state.KeepRunning()) {
+//     std::vector<int> v;
+//     v.reserve(1);
+//     v.push_back(42);
+//   }
+// }
+// // BENCHMARK(bench_push_back);
+
+// static void bench_direct_push_back(benchmark::State& state) {
+//   while (state.KeepRunning()) {
+//     std::vector<int> v;
+//     escape(v.data());
+//     v.push_back(42);
+//     clobber();
+//   }
+// }
+// // BENCHMARK(bench_direct_push_back);
+
+// static void divide(benchmark::State& state) {
+//   // Code inside this loop is measured repeatedly
+//   for (auto _ : state) {
+//     // int i = rand() / rand();
+//   }
+// }
+// // Register the function as a benchmark
+// // BENCHMARK(divide);
+
+// static void modular(benchmark::State& state) {
+//   // Code before the loop is not measured
+//   // std::string x = "hello";
+//   for (auto _ : state) {
+//     // int i = rand() % rand();
+//   }
+// }
+// BENCHMARK(modular);
+
+static void vector_add(benchmark::State& state) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  auto num = state.range(0);
+  std::uniform_int_distribution<int> dis(1, 10000);
+  std::vector<int> a(num);
+  std::vector<int> b(num);
+  std::vector<int> c(num);
+  auto randomGenerate = [&gen, &dis] () {
+                          return dis(gen);
+                        };
+  std::generate(a.begin(), a.end(), randomGenerate);
+  std::generate(b.begin(), b.end(), randomGenerate);
+  // int sum = 0;
+  for (auto _ : state) {
+    for (std::size_t i = 0; i < a.size(); ++i) {
+      c[i] = a[i] + b[i];
+      // sum += c[i];
+    }
+  }
+  escape(&c);
+  // escape(&sum);
+  clobber();
+}
+BENCHMARK(vector_add)->RangeMultiplier(2)->Range(8, 1<<20);
+BENCHMARK_MAIN();
+
