@@ -1,11 +1,16 @@
 cmake_minimum_required(VERSION 3.5.1)
 
+project(testing LANGUAGES CUDA CXX)
+
 if(MSVC)
   add_compile_options(/W3 /WX)
 else()
-  add_compile_options(-W -Wall -Werror -fno-omit-frame-pointer)
+  #add_compile_options(-W -Wall -Werror -fno-omit-frame-pointer)
   #add_compile_options(-W -Wall)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Werror -fno-omit-frame-pointer")
 endif()
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CUDA_STANDARD 11)
 
 #list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules/tensorflow-cmake")
 
@@ -25,7 +30,6 @@ find_package( SFML 2 REQUIRED network audio graphics window system)
 
 # find_package( ortools CONFIG REQUIRED )
 
-set(CMAKE_CXX_STANDARD 11)
 #add_subdirectory(abseil-cpp)
 
 add_executable ( testing.out test.cpp )
@@ -50,13 +54,16 @@ target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
 # target_include_directories(hw.out PRIVATE ${GTEST_INCLUDE_DIR})
 # target_link_libraries(hw.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
 
-add_executable(hw2.out hw2.cpp)
-target_include_directories(hw2.out PRIVATE ${GTEST_INCLUDE_DIR})
-target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
+# add_executable(hw2.out hw2.cpp)
+# target_include_directories(hw2.out PRIVATE ${GTEST_INCLUDE_DIR})
+# target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} benchmark::benchmark) #${GTEST_MAIN_LIBRARIES})
 
 add_executable(draw_window.out draw_window.cpp)
 target_link_libraries(draw_window.out PRIVATE ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
 
+add_executable(test_scan.out test/test_scan.cu)
+target_link_libraries(test_scan.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
+target_include_directories(test_scan.out PRIVATE cuda)
 #enable_language(C ASM_NASM)
 #set_source_files_properties(src/avx.asm PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
 

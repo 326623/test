@@ -23,28 +23,25 @@
  *
  */
 
-template <typename Iterator>
-__host__ __device__
-void inclusive_scan(Iterator first, Iterator last, Iterator::value_type initial,
-                    BinaryOp op) {
+// template <typename Iterator>
+// __host__ __device__
+// void inclusive_scan(Iterator first, Iterator last, Iterator::value_type initial,
+//                     BinaryOp op) {
   
-}
+// }
 
-__device__
+// __device__
+__global__
 void inclusive_prefix_sum(float* first, float* last) {
-  int num = last - first;
+  int num_elements = last - first;
   int id = threadIdx.x + blockIdx.x * blockDim.x;
   // may need to check overflow
-  int maxJ = static_cast<int>(ceil(log(static_cast<float>(n))));
+  int maxJ = static_cast<int>(ceil(log(static_cast<float>(num_elements))));
   for (int j = 0; j < maxJ; ++ j) {
-    for (int i = id; i < num; i += blockDim.x * gridDim.x) {
+    for (int i = id; i < num_elements; i += blockDim.x * gridDim.x) {
       if (i >= (1 << (j-1))) {
-        first[k] = first[k - (1 << (j-1))] + first[k];
+        first[i] = first[i - (1 << (j-1))] + first[i];
       }
     }
   }
-}
-
-int main() {
-  cuda
 }
