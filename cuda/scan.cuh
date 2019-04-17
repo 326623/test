@@ -36,12 +36,16 @@ void inclusive_prefix_sum(float* first, float* last) {
   int num_elements = last - first;
   int id = threadIdx.x + blockIdx.x * blockDim.x;
   // may need to check overflow
-  int maxJ = static_cast<int>(ceil(log(static_cast<float>(num_elements))));
-  for (int j = 0; j < maxJ; ++ j) {
+  // int maxJ = static_cast<int>(ceil(log(static_cast<float>(num_elements))));
+  // for (int j = 0; j < maxJ; ++ j) {
+  // int maxJ = 0;
+  // for (; (1 << maxJ) < num_elements; ++ maxJ) {}
+  for (int j = 0; (1 << j) < num_elements; ++ j) {
     for (int i = id; i < num_elements; i += blockDim.x * gridDim.x) {
-      if (i >= (1 << (j-1))) {
-        first[i] = first[i - (1 << (j-1))] + first[i];
+      if (i >= (1 << j)) {
+        first[i] = first[i - (1 << j)] + first[i];
       }
     }
+    __syncthreads();
   }
 }
