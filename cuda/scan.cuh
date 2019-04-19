@@ -25,14 +25,15 @@
 
 // template <typename Iterator>
 // __host__ __device__
-// void inclusive_scan(Iterator first, Iterator last, Iterator::value_type initial,
+// void inclusive_scan(Iterator first, Iterator last, Iterator::value_type
+// initial,
 //                     BinaryOp op) {
-  
+
 // }
 
 // __device__
-__global__
-void inclusive_prefix_sum(float* first, float* last) {
+// this implementation is flawed, don't use it
+__global__ void inclusive_prefix_sum(float* first, float* last) {
   int num_elements = last - first;
   int id = threadIdx.x + blockIdx.x * blockDim.x;
   // may need to check overflow
@@ -40,7 +41,7 @@ void inclusive_prefix_sum(float* first, float* last) {
   // for (int j = 0; j < maxJ; ++ j) {
   // int maxJ = 0;
   // for (; (1 << maxJ) < num_elements; ++ maxJ) {}
-  for (int j = 0; (1 << j) < num_elements; ++ j) {
+  for (int j = 0; (1 << j) < num_elements; ++j) {
     for (int i = id; i < num_elements; i += blockDim.x * gridDim.x) {
       if (i >= (1 << j)) {
         first[i] = first[i - (1 << j)] + first[i];
@@ -48,4 +49,30 @@ void inclusive_prefix_sum(float* first, float* last) {
     }
     __syncthreads();
   }
+}
+
+// double buffered version
+__global__ void scan(float* g_odata, float* g_idata, int n) {
+  extern __stared__ float temp[];
+  int thid = threadIdx.x;
+  int pout = 0, pin = 1;
+
+  // load input into shared memory.
+  // This is exclusive scan, so shift right by one and set first elt to 0
+  temp[pout * n + thid] = (thid > 0) ? g_idate[thid - 1] : 0;
+  __syncthreads();
+
+  for (int offset = 1; offset < n; offset *= 2) {
+    pout = 1 - pout;
+    pin = 1 - pout;
+
+    if (thid >= offset)
+      temp[pout * n + thid] += temp[pin * n + thid - offset];
+    else
+      temp[pout * n + thid] = temp[pin * n + thid];
+
+    __syncthreads();
+  }
+
+  g_odata[thid] = temp[pout * n + thid1];
 }
