@@ -28,10 +28,7 @@
 ;;          (helm-make-arguments . "-j7"))))
 
 ((nil .
-      ((cmake-ide-project-dir . ".")
-       (cmake-ide-build-dir . "./build")
-       (cmake-ide-cmake-opts . "-DCMAKE_BUILD_TYPE=Debug")
-       (helm-make-build-dir . "./build")
+      ((helm-make-build-dir . "./build")
        (helm-make-arguments . "-j8")
        (helm-ctest-dir . "build")
        )))

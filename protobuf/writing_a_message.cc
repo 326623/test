@@ -1,11 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "addressbook.ph.h"
+#include "addressbook.pb.h"
 using namespace std;
 
 // This function fills in a Person message based on user input.
-void PromptForAddress(tutorial::Person* persons) {
+void PromptForAddress(tutorial::Person* person) {
   cout << "Enter person ID number: ";
   int id;
   cin >> id;
@@ -51,7 +51,7 @@ void PromptForAddress(tutorial::Person* persons) {
 // Main function:  Reads the entire address book from a file,
 //    adds one person based on user input, then writes it back out to the same
 //    file.
-int main(int argc, char* argv) {
+int main(int argc, char* argv[]) {
   // Verify that the version of the library that we linked against is
   // compatible with the version of the headers we compiled against.
   GOOGLE_PROTOBUF_VERIFY_VERSION;
