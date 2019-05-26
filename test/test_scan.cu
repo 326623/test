@@ -36,71 +36,71 @@
 // std::unique_ptr<T> make_unique(Args&&... args) {
 //   return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 // }
-template <class T, class ...Args>
-typename std::enable_if
-<
-    !std::is_array<T>::value,
-    std::unique_ptr<T>
->::type
-make_unique(Args&& ...args)
-{
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
-template <class T>
-typename std::enable_if
-<
-    std::is_array<T>::value,
-    std::unique_ptr<T>
->::type
-make_unique(std::size_t n)
-{
-    typedef typename std::remove_extent<T>::type RT;
-    return std::unique_ptr<T>(new RT[n]);
-}
-
-__global__ void generate_from(float* first, float* last, int start_from) {
-  int id = threadIdx.x + blockIdx.x * blockDim.x;
-  int num_elements = last - first;
-  for (int i = id; i < num_elements; i += blockDim.x * gridDim.x) {
-    first[i] = start_from + i;
-  }
-}
-
-// int main() {
-//   const int kN = 100;
-//   std::size_t size = N * sizeof(float);
-//   auto h_A = make_unique<float>(size);
-//   float& d_A;
-//   cudaMalloc(&d_A, size);
-//   cudaError_t error = cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
-//   // if (error != cudaSuccess) {
-//   // }
-//   inclusive_prefix_sum<16 * 16, 16 * 16>(
-//       d_A, d_A + size, 0, [](float a, float b) { return a + b; });
+// template <class T, class ...Args>
+// typename std::enable_if
+// <
+//     !std::is_array<T>::value,
+//     std::unique_ptr<T>
+// >::type
+// make_unique(Args&& ...args)
+// {
+//     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 // }
-TEST(TEST_SCAN, TEST1) {
-  const int kSize = 1000;
-  auto h_A = make_unique<float[]>(kSize);
-  // float* hh_A = new float[kSize];
-  float* d_A;
-  cudaMalloc(&d_A, kSize * sizeof(float));
-  cudaError_t error = cudaMemcpy(d_A, h_A.get(), kSize * sizeof(float), cudaMemcpyHostToDevice);
-  // cudaEvent_t stop;
-  if (error != cudaSuccess) {
-    std::exit(-1);
-  }
-  generate_from<<<16 * 16, 16 * 16>>>(d_A, d_A + kSize, 1);
-  // cudaDeviceSynchronize();
-  inclusive_prefix_sum<<<16 * 16, 16 * 16>>>(
-      d_A, d_A + kSize);
-  error = cudaMemcpy(h_A.get(), d_A, kSize * sizeof(float), cudaMemcpyDeviceToHost);
-  cudaDeviceSynchronize();
 
-  // checking correct
-  for (int i = 0; i < kSize; ++ i) {
-    EXPECT_EQ(h_A[i], (i+2) * (i+1) / 2);
-  }
-  cudaFree(d_A);
-  // error = cudaEventSynchronize(&stop);
-}
+// template <class T>
+// typename std::enable_if
+// <
+//     std::is_array<T>::value,
+//     std::unique_ptr<T>
+// >::type
+// make_unique(std::size_t n)
+// {
+//     typedef typename std::remove_extent<T>::type RT;
+//     return std::unique_ptr<T>(new RT[n]);
+// }
+
+// __global__ void generate_from(float* first, float* last, int start_from) {
+//   int id = threadIdx.x + blockIdx.x * blockDim.x;
+//   int num_elements = last - first;
+//   for (int i = id; i < num_elements; i += blockDim.x * gridDim.x) {
+//     first[i] = start_from + i;
+//   }
+// }
+
+// // int main() {
+// //   const int kN = 100;
+// //   std::size_t size = N * sizeof(float);
+// //   auto h_A = make_unique<float>(size);
+// //   float& d_A;
+// //   cudaMalloc(&d_A, size);
+// //   cudaError_t error = cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
+// //   // if (error != cudaSuccess) {
+// //   // }
+// //   inclusive_prefix_sum<16 * 16, 16 * 16>(
+// //       d_A, d_A + size, 0, [](float a, float b) { return a + b; });
+// // }
+// TEST(TEST_SCAN, TEST1) {
+//   const int kSize = 1000;
+//   auto h_A = make_unique<float[]>(kSize);
+//   // float* hh_A = new float[kSize];
+//   float* d_A;
+//   cudaMalloc(&d_A, kSize * sizeof(float));
+//   cudaError_t error = cudaMemcpy(d_A, h_A.get(), kSize * sizeof(float), cudaMemcpyHostToDevice);
+//   // cudaEvent_t stop;
+//   if (error != cudaSuccess) {
+//     std::exit(-1);
+//   }
+//   generate_from<<<16 * 16, 16 * 16>>>(d_A, d_A + kSize, 1);
+//   // cudaDeviceSynchronize();
+//   inclusive_prefix_sum<<<16 * 16, 16 * 16>>>(
+//       d_A, d_A + kSize);
+//   error = cudaMemcpy(h_A.get(), d_A, kSize * sizeof(float), cudaMemcpyDeviceToHost);
+//   cudaDeviceSynchronize();
+
+//   // checking correct
+//   for (int i = 0; i < kSize; ++ i) {
+//     EXPECT_EQ(h_A[i], (i+2) * (i+1) / 2);
+//   }
+//   cudaFree(d_A);
+//   // error = cudaEventSynchronize(&stop);
+// }

@@ -19,7 +19,7 @@ set(CMAKE_CUDA_STANDARD 11)
 find_package( Eigen3 REQUIRED )
 # find_package( Protobuf REQUIRED )
 
-find_package( Eigen3 3.3 REQUIRED NO_MODULE )
+# find_package( Eigen3 3.3 REQUIRED NO_MODULE )
 # find_package( Vc 1.4 REQUIRED )
 find_package( GTest REQUIRED )
 find_package( benchmark REQUIRED )
@@ -32,10 +32,10 @@ find_package( SFML 2 REQUIRED network audio graphics window system)
 
 #add_subdirectory(abseil-cpp)
 
-add_executable ( testing.out test.cpp )
-target_link_libraries ( testing.out PRIVATE Eigen3::Eigen ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES}) # ortools::ortools  )
-target_compile_options ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} ${Vc_ALL_FLAGS} "-O3" )
-target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
+# add_executable ( testing.out test.cpp )
+# target_link_libraries ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES}) # ortools::ortools  )
+# target_compile_options ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} ${Vc_ALL_FLAGS} "-O3" )
+# target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
 
 #message ( STATUS ${Vc_LIB_DIR} )
 #message ( STATUS ${Vc_INCLUDE_DIR} )
@@ -61,9 +61,11 @@ target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
 add_executable(draw_window.out draw_window.cpp)
 target_link_libraries(draw_window.out PRIVATE ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
 
-add_executable(test_scan.out test/test_scan.cu)
-target_link_libraries(test_scan.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
-target_include_directories(test_scan.out PRIVATE cuda)
+# add_executable(test_scan.out test/test_scan.cu)
+# target_link_libraries(test_scan.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
+# target_include_directories(test_scan.out PRIVATE cuda)
+
+add_executable(device_memory.out cuda/device_memory.cu)
 #enable_language(C ASM_NASM)
 #set_source_files_properties(src/avx.asm PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
 
