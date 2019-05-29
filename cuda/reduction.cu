@@ -11,6 +11,9 @@
 
 // }
 
+// FindMax Assumes that 1D block and 1D thread block. Also the number of
+// elements to be processed should exceed the number of workers, which means
+// that n >= stride. Otherwise, the behaviour is undefined.
 __global__ void FindMax(const float* array, int n,
                         // output parameter
                         float* out_array) {
@@ -21,9 +24,26 @@ __global__ void FindMax(const float* array, int n,
   int id = blockIdx.x * blockDim.x + threadIdx.x;
   int stride = blockDim.x * gridDim.x;
 
-  float local_max = array[id];
+  // float local_max = array[id];
   // Find max for each thread
-  for (int i = id + stride; i < n; i += stride) {
+  // // This not only requires commutative property and associative property
+  // for (int i = id + stride; i < n; i += stride) {
+  //   if (local_max < array[i]) {
+  //     local_max = array[i];
+  //   }
+  // }
+
+  // Dispatch workload evenly
+  int workload = n / stride;
+  int start = workload * id;
+  int end = workload * (id + 1);
+  // last one takes up more work
+  if (id == stride - 1)
+    end = n;
+
+  float local_max = array[start];
+
+  for (int i = start; i < end; ++i) {
     if (local_max < array[i]) {
       local_max = array[i];
     }
