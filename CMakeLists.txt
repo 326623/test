@@ -70,7 +70,7 @@ target_link_libraries(draw_window.out PRIVATE ${SFML_LIBRARIES} ${SFML_DEPENDENC
 
 add_executable(device_memory.out cuda/device_memory.cu)
 
-add_executable(reduction.out cuda/reduction.cu)
+add_executable(reduction.out cuda/benchmark_reduction.cu)
 target_link_libraries(reduction.out absl::strings benchmark::benchmark glog::glog absl::str_format ${CUDA_curand_LIBRARY} benchmark::benchmark_main ${GTEST_LIBRARIES})
 #enable_language(C ASM_NASM)
 #set_source_files_properties(src/avx.asm PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
