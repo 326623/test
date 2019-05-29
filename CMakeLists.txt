@@ -24,6 +24,9 @@ find_package( Eigen3 REQUIRED )
 find_package( GTest REQUIRED )
 find_package( benchmark REQUIRED )
 find_package( OpenMP REQUIRED )
+find_package( absl REQUIRED )
+find_package( Glog REQUIRED )
+find_package( CUDA REQUIRED )
 
 # use -DCMAKE_MODULE_PATH to help cmake locate cmake modules (FindXXXX)
 find_package( SFML 2 REQUIRED network audio graphics window system)
@@ -66,6 +69,9 @@ target_link_libraries(draw_window.out PRIVATE ${SFML_LIBRARIES} ${SFML_DEPENDENC
 # target_include_directories(test_scan.out PRIVATE cuda)
 
 add_executable(device_memory.out cuda/device_memory.cu)
+
+add_executable(reduction.out cuda/reduction.cu)
+target_link_libraries(reduction.out absl::strings benchmark::benchmark glog::glog absl::str_format ${CUDA_curand_LIBRARY} benchmark::benchmark_main ${GTEST_LIBRARIES})
 #enable_language(C ASM_NASM)
 #set_source_files_properties(src/avx.asm PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
 
