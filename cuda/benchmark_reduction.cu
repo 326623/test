@@ -9,6 +9,7 @@
 #include <curand.h>
 #include <thrust/functional.h>
 #include <thrust/reduce.h>
+#include <thrust/device_ptr.h>
 
 #include "cuda_macro.h"
 #include "reduction.cuh"
@@ -57,6 +58,7 @@ BENCHMARK_DEFINE_F(RandomArrayFixture, BM_RandomNumberGeneration)
 class ReductionFixture : public benchmark::Fixture {
  public:
   void SetUp(const ::benchmark::State& state) {
+    // std::cout << "Setting up\n";
     n = state.range(0);
     array = new float[n];
     CUDA_CALL(cudaMalloc(&device_array, n * sizeof(float)));
@@ -67,6 +69,7 @@ class ReductionFixture : public benchmark::Fixture {
   }
 
   void TearDown(const ::benchmark::State& state) {
+    // std::cout << "Tearing down\n";
     delete array;
     CURAND_CALL(curandDestroyGenerator(gen));
     CUDA_CALL(cudaFree(device_array));
@@ -91,18 +94,11 @@ BENCHMARK_DEFINE_F(ReductionFixture, BM_FindMaxBaseline)
     CUDA_CALL(cudaMemcpy(array, device_array, n * sizeof(float),
                          cudaMemcpyDeviceToHost));
 
+    thrust::device_ptr<float> device_ptr(device_array);
     CUDA_CALL(cudaEventRecord(start));
-    float max_device =
-        thrust::reduce(thrust::device, device_array, device_array + n, 0.0f,
-                       thrust::maximum<float>());
-    // FindMax1<<<64, 64, 64 * sizeof(float)>>>(device_array, n, device_array);
+    float max_device = thrust::reduce(device_ptr, device_ptr + n, 0.0f,
+                                      thrust::maximum<float>());
     CUDA_CALL(cudaEventRecord(stop));
-    // FindMax1<<<1, 64, 64 * sizeof(float)>>>(device_array, n, device_array);
-
-    // CUDA_CALL(cudaEventRecord(start));
-    // FindMax1<<<4, 1024, 1024 * sizeof(float)>>>(device_array, n,
-    // device_array); CUDA_CALL(cudaEventRecord(stop)); FindMax1<<<1, 4, 1024 *
-    // sizeof(float)>>>(device_array, n, device_array);
 
     float max_host = HostFindMax(array, n);
     // CUDA_CALL(cudaMemcpy(array, device_array, 1 * sizeof(float),
@@ -113,6 +109,23 @@ BENCHMARK_DEFINE_F(ReductionFixture, BM_FindMaxBaseline)
     CUDA_CALL(cudaEventElapsedTime(&milliseconds, start, stop));
     // Takes second
     state.SetIterationTime(milliseconds / 1.0e3);
+  }
+  state.SetBytesProcessed(static_cast<int64_t>(state.iterations()) *
+                          state.range(0) * 4);
+}
+
+BENCHMARK_DEFINE_F(ReductionFixture, BM_FindMaxCPUBaseline)
+(benchmark::State& state) {
+  for (auto _ : state) {
+    // Generate random number
+    state.PauseTiming();
+    CURAND_CALL(curandGenerateUniform(gen, device_array, n));
+    CUDA_CALL(cudaMemcpy(array, device_array, n * sizeof(float),
+                         cudaMemcpyDeviceToHost));
+
+    state.ResumeTiming();
+    float max_host = HostFindMax(array, n);
+    benchmark::DoNotOptimize(max_host);
   }
   state.SetBytesProcessed(static_cast<int64_t>(state.iterations()) *
                           state.range(0) * 4);
@@ -193,6 +206,11 @@ BENCHMARK_REGISTER_F(ReductionFixture, BM_FindMaxBaseline)
     ->RangeMultiplier(2)
     ->Range(1 << 12, 1 << 28)
     ->UseManualTime()
+    ->Unit(benchmark::kMillisecond);
+
+BENCHMARK_REGISTER_F(ReductionFixture, BM_FindMaxCPUBaseline)
+    ->RangeMultiplier(2)
+    ->Range(1 << 12, 1 << 28)
     ->Unit(benchmark::kMillisecond);
 
 BENCHMARK_REGISTER_F(ReductionFixture, BM_FindMax0)
