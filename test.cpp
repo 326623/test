@@ -1,3 +1,21 @@
+// Simulating PI
+#include <cmath>
+#include <iostream>
+#define M_PIl          3.141592653589793238462643383279502884L
+int main() {
+    int num_iteration = 100000000;
+    int sign = 1;
+    double accumulate = 0.0;
+    for (int i = 0; i < num_iteration; ++i) {
+        double num = 1.0 / static_cast<double>(2 * i + 1);
+        accumulate += sign * num;
+        sign = -sign;
+    }
+    accumulate = 4 * accumulate;
+    std::cout << (accumulate - M_PIl) << '\n';
+    return 0;
+}
+
 // #include <vector>
 // #include <algorithm>
 // #include <iostream>
@@ -708,16 +726,16 @@
 //   return (id == StateID::no_state);
 // }
 
-#include <benchmark/benchmark.h>
-#include <vector>
-#include <iostream>
-static void escape(void* p) {
-  asm volatile("" : : "g"(p) : "memory");
-}
-
-static void clobber() {
-  asm volatile("" : : : "memory");
-}
+//#include <benchmark/benchmark.h>
+//#include <vector>
+//#include <iostream>
+//static void escape(void* p) {
+//  asm volatile("" : : "g"(p) : "memory");
+//}
+//
+//static void clobber() {
+//  asm volatile("" : : : "memory");
+//}
 
 // static void bench_create(benchmark::State& state) {
 //   while (state.KeepRunning()) {
@@ -774,30 +792,30 @@ static void clobber() {
 // }
 // BENCHMARK(modular);
 
-static void vector_add(benchmark::State& state) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  auto num = state.range(0);
-  std::uniform_int_distribution<int> dis(1, 10000);
-  std::vector<int> a(num);
-  std::vector<int> b(num);
-  std::vector<int> c(num);
-  auto randomGenerate = [&gen, &dis] () {
-                          return dis(gen);
-                        };
-  std::generate(a.begin(), a.end(), randomGenerate);
-  std::generate(b.begin(), b.end(), randomGenerate);
-  // int sum = 0;
-  for (auto _ : state) {
-    for (std::size_t i = 0; i < a.size(); ++i) {
-      c[i] = a[i] + b[i];
-      // sum += c[i];
-    }
-  }
-  escape(&c);
-  // escape(&sum);
-  clobber();
-}
-BENCHMARK(vector_add)->RangeMultiplier(2)->Range(8, 1<<20);
-BENCHMARK_MAIN();
+//static void vector_add(benchmark::State& state) {
+//  std::random_device rd;
+//  std::mt19937 gen(rd());
+//  auto num = state.range(0);
+//  std::uniform_int_distribution<int> dis(1, 10000);
+//  std::vector<int> a(num);
+//  std::vector<int> b(num);
+//  std::vector<int> c(num);
+//  auto randomGenerate = [&gen, &dis] () {
+//                          return dis(gen);
+//                        };
+//  std::generate(a.begin(), a.end(), randomGenerate);
+//  std::generate(b.begin(), b.end(), randomGenerate);
+//  // int sum = 0;
+//  for (auto _ : state) {
+//    for (std::size_t i = 0; i < a.size(); ++i) {
+//      c[i] = a[i] + b[i];
+//      // sum += c[i];
+//    }
+//  }
+//  escape(&c);
+//  // escape(&sum);
+//  clobber();
+//}
+//BENCHMARK(vector_add)->RangeMultiplier(2)->Range(8, 1<<20);
+//BENCHMARK_MAIN();
 

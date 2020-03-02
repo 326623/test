@@ -2,6 +2,24 @@ cmake_minimum_required(VERSION 3.5.1)
 
 project(testing LANGUAGES CUDA CXX)
 
+if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup(TARGETS)
+else ()
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake_modules/conan.cmake")
+        message(STATUS "conan.cmake not found")
+        message(FATAL_ERROR "The file conanbuildinfo.cmake doesn't exist, you have to run conan install first")
+    else ()
+        include(${CMAKE_SOURCE_DIR}/cmake_modules/conan.cmake)
+        conan_cmake_run(CONANFILE conanfile.py
+                BASIC_SETUP CMAKE_TARGETS
+                BUILD missing)
+    endif ()
+endif ()
+
+
+
+#
 if(MSVC)
   add_compile_options(/W3 /WX)
 else()
@@ -10,68 +28,70 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Werror -fno-omit-frame-pointer")
 endif()
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CUDA_STANDARD 11)
 
-#list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules/tensorflow-cmake")
-
-# tensorflow dependency
-# find_package( TensorFlow REQUIRED )
-find_package( Eigen3 REQUIRED )
-# find_package( Protobuf REQUIRED )
-
-# find_package( Eigen3 3.3 REQUIRED NO_MODULE )
-# find_package( Vc 1.4 REQUIRED )
-find_package( GTest REQUIRED )
-find_package( benchmark REQUIRED )
-find_package( OpenMP REQUIRED )
-find_package( absl REQUIRED )
-find_package( Glog REQUIRED )
-find_package( CUDA REQUIRED )
-
-# use -DCMAKE_MODULE_PATH to help cmake locate cmake modules (FindXXXX)
-find_package( SFML 2 REQUIRED network audio graphics window system)
-
-# find_package( ortools CONFIG REQUIRED )
-
-#add_subdirectory(abseil-cpp)
-
-# add_executable ( testing.out test.cpp )
-# target_link_libraries ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES}) # ortools::ortools  )
-# target_compile_options ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} ${Vc_ALL_FLAGS} "-O3" )
-# target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
-
-#message ( STATUS ${Vc_LIB_DIR} )
-#message ( STATUS ${Vc_INCLUDE_DIR} )
-# message ( STATUS ${Vc_DEFINITIONS} )
-# message ( STATUS ${Vc_COMPILER_FLAGS} )
-# message ( STATUS ${Vc_ARCHITECTURE_FLAGS} )
-# message ( STATUS ${Vc_ALL_FLnnAGS} )
-
-# add_executable ( testing.out test.cpp )
-# target_include_directories(testing.out PRIVATE
-#   ${Protobuf_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${TensorFlow_INCLUDE_DIR} "${CMAKE_CURRENT_LIST_DIR}/include")
-# target_link_libraries(testing.out PRIVATE
-#   ${TensorFlow_LIBRARY} ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
-
-# add_executable(hw.out hw.cpp)
-# target_include_directories(hw.out PRIVATE ${GTEST_INCLUDE_DIR})
-# target_link_libraries(hw.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
-
-# add_executable(hw2.out hw2.cpp)
-# target_include_directories(hw2.out PRIVATE ${GTEST_INCLUDE_DIR})
-# target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} benchmark::benchmark) #${GTEST_MAIN_LIBRARIES})
-
-add_executable(draw_window.out draw_window.cpp)
-target_link_libraries(draw_window.out PRIVATE ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
-
-# add_executable(test_scan.out test/test_scan.cu)
-# target_link_libraries(test_scan.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
-# target_include_directories(test_scan.out PRIVATE cuda)
-
-add_executable(device_memory.out cuda/device_memory.cu)
-
-add_executable(reduction.out cuda/benchmark_reduction.cu)
-target_link_libraries(reduction.out absl::strings benchmark::benchmark glog::glog absl::str_format ${CUDA_curand_LIBRARY} benchmark::benchmark_main ${GTEST_LIBRARIES})
+add_executable(test test.cpp)
+#set(CMAKE_CUDA_STANDARD 11)
+#
+##list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules/tensorflow-cmake")
+#
+## tensorflow dependency
+## find_package( TensorFlow REQUIRED )
+#find_package( Eigen3 REQUIRED )
+## find_package( Protobuf REQUIRED )
+#
+## find_package( Eigen3 3.3 REQUIRED NO_MODULE )
+## find_package( Vc 1.4 REQUIRED )
+#find_package( GTest REQUIRED )
+#find_package( benchmark REQUIRED )
+#find_package( OpenMP REQUIRED )
+#find_package( absl REQUIRED )
+#find_package( Glog REQUIRED )
+#find_package( CUDA REQUIRED )
+#
+## use -DCMAKE_MODULE_PATH to help cmake locate cmake modules (FindXXXX)
+#find_package( SFML 2 REQUIRED network audio graphics window system)
+#
+## find_package( ortools CONFIG REQUIRED )
+#
+##add_subdirectory(abseil-cpp)
+#
+## add_executable ( testing.out test.cpp )
+## target_link_libraries ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} benchmark::benchmark ${Vc_LIBRARIES}) # ortools::ortools  )
+## target_compile_options ( testing.out PRIVATE ${OpenMP_CXX_FLAGS} ${Vc_ALL_FLAGS} "-O3" )
+## target_include_directories ( testing.out PRIVATE ${Vc_INCLUDE_DIR} )
+#
+##message ( STATUS ${Vc_LIB_DIR} )
+##message ( STATUS ${Vc_INCLUDE_DIR} )
+## message ( STATUS ${Vc_DEFINITIONS} )
+## message ( STATUS ${Vc_COMPILER_FLAGS} )
+## message ( STATUS ${Vc_ARCHITECTURE_FLAGS} )
+## message ( STATUS ${Vc_ALL_FLnnAGS} )
+#
+## add_executable ( testing.out test.cpp )
+## target_include_directories(testing.out PRIVATE
+##   ${Protobuf_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${TensorFlow_INCLUDE_DIR} "${CMAKE_CURRENT_LIST_DIR}/include")
+## target_link_libraries(testing.out PRIVATE
+##   ${TensorFlow_LIBRARY} ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES})
+#
+## add_executable(hw.out hw.cpp)
+## target_include_directories(hw.out PRIVATE ${GTEST_INCLUDE_DIR})
+## target_link_libraries(hw.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
+#
+## add_executable(hw2.out hw2.cpp)
+## target_include_directories(hw2.out PRIVATE ${GTEST_INCLUDE_DIR})
+## target_link_libraries(hw2.out PRIVATE ${GTEST_LIBRARIES} benchmark::benchmark) #${GTEST_MAIN_LIBRARIES})
+#
+#add_executable(draw_window.out draw_window.cpp)
+#target_link_libraries(draw_window.out PRIVATE ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
+#
+## add_executable(test_scan.out test/test_scan.cu)
+## target_link_libraries(test_scan.out PRIVATE ${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARIES} benchmark::benchmark)
+## target_include_directories(test_scan.out PRIVATE cuda)
+#
+#add_executable(device_memory.out cuda/device_memory.cu)
+#
+#add_executable(reduction.out cuda/benchmark_reduction.cu)
+#target_link_libraries(reduction.out absl::strings benchmark::benchmark glog::glog absl::str_format ${CUDA_curand_LIBRARY} benchmark::benchmark_main ${GTEST_LIBRARIES})
 #enable_language(C ASM_NASM)
 #set_source_files_properties(src/avx.asm PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
 
